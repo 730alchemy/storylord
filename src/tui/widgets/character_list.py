@@ -127,13 +127,10 @@ class CharacterListPane(Vertical):
             try:
                 table.scroll_to_row(0)
             except AttributeError:
-                # scroll_to_row may not be available in all Textual versions
-                # Focusing the table should be sufficient
                 pass
 
     def _show_new_form(self) -> None:
         """Show the new character form."""
-        print("DEBUG: Showing new form")
         form = self.query_one("#new-character-form")
         form.display = True
         self._showing_new_form = True
@@ -143,10 +140,11 @@ class CharacterListPane(Vertical):
         self.query_one("#new-description", TextArea).text = ""
         # Focus the name input
         self.query_one("#new-name", Input).focus()
+        # Scroll to bottom to ensure form is visible
+        self.scroll_end(animate=False)
 
     def _hide_new_form(self) -> None:
         """Hide the new character form."""
-        print("DEBUG: Hiding new form")
         form = self.query_one("#new-character-form")
         form.display = False
         self._showing_new_form = False
@@ -157,7 +155,6 @@ class CharacterListPane(Vertical):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""
-        print(f"DEBUG: Button pressed: {event.button.id}")
         if event.button.id == "btn-new":
             self._show_new_form()
         elif event.button.id == "btn-cancel":

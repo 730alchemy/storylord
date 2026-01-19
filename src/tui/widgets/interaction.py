@@ -65,7 +65,7 @@ class InteractionPane(Vertical):
             )
 
             # Chat display (for speak conversations)
-            yield Static("Conversation:", classes="form-label")
+            yield Static("Conversation History:", classes="form-label")
             yield TextArea(id="chat-display", read_only=True)
 
             # Speak inputs
@@ -73,7 +73,7 @@ class InteractionPane(Vertical):
                 yield Static("Scene Context:", classes="form-label")
                 yield TextArea(id="speak-scene-context")
                 yield Static("Your message:", classes="form-label")
-                yield Input(id="speak-prompt", placeholder="What do you say?")
+                yield Input(id="speak-prompt", placeholder="Type your message here...")
 
             # Think inputs
             with Vertical(id="think-inputs"):

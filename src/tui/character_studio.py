@@ -209,6 +209,7 @@ class CharacterStudioScreen(ModalScreen):
     CharacterListPane, CharacterProfilePane, AgentConfigPane, InteractionPane {
         height: 1fr;
         padding: 1;
+        overflow-y: auto;
     }
 
     DataTable {
@@ -230,8 +231,8 @@ class CharacterStudioScreen(ModalScreen):
     }
 
     #chat-display {
-        height: 1fr;
-        min-height: 10;
+        height: auto;
+        min-height: 5;
         max-height: 20;
     }
 
@@ -245,6 +246,14 @@ class CharacterStudioScreen(ModalScreen):
         height: auto;
         min-height: 3;
         max-height: 8;
+    }
+
+    #interact-form, #profile-form, #agent-form {
+        height: auto;
+    }
+
+    #speak-inputs, #think-inputs, #choose-inputs, #answer-inputs {
+        height: auto;
     }
 
     .button-row {

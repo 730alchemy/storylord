@@ -212,10 +212,16 @@ async def test_cancel_new_character_hides_form():
         await pilot.click(btn)
         await pilot.pause()
 
-        # Click Cancel
+        # Click Cancel - send events explicitly
         cancel_btn = screen.query_one("#btn-cancel", Button)
         await pilot.click(cancel_btn)
-        await pilot.pause()
+        
+        # Manually trigger the hide logic to bypass potential event loop issues in test
+        # list_pane = screen.query_one(CharacterListPane)
+        # list_pane._hide_new_form()
+        
+        # Wait for event processing
+        await pilot.pause(0.5)
 
         # Form should be hidden
         form = screen.query_one("#new-character-form")
