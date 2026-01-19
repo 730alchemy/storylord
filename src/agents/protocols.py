@@ -6,19 +6,18 @@ External packages can implement these protocols to create custom agents.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
-if TYPE_CHECKING:
-    from agents.character.registry import CharacterRegistry
-    from models import (
-        ArchitectInput,
-        EditedText,
-        EditorInput,
-        NarratedStory,
-        NarratorInput,
-        StoryArchitecture,
-    )
-    from tools.registry import ToolRegistry
+from agents.character.registry import CharacterRegistry
+from models import (
+    ArchitectInput,
+    EditedText,
+    EditorInput,
+    NarratedStory,
+    NarratorInput,
+    StoryArchitecture,
+)
+from tools.registry import ToolRegistry
 
 
 class Architect(Protocol):
@@ -61,7 +60,7 @@ class Narrator(Protocol):
         self,
         input: NarratorInput,
         tools: ToolRegistry | None = None,
-        character_registry: "CharacterRegistry | None" = None,
+        character_registry: CharacterRegistry | None = None,
     ) -> NarratedStory:
         """Generate narrative prose from a story architecture.
 

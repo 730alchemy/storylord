@@ -5,11 +5,9 @@ from installed packages that register entry points.
 """
 
 from importlib.metadata import entry_points
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from agents.character.protocols import CharacterAgentType
-    from agents.protocols import Architect, Editor, Narrator
+from agents.character.protocols import CharacterAgentType
+from agents.protocols import Architect, Editor, Narrator
 
 
 def discover_architects() -> dict[str, type]:
@@ -32,7 +30,7 @@ def discover_narrators() -> dict[str, type]:
     return {ep.name: ep.load() for ep in eps}
 
 
-def get_architect(name: str) -> "Architect":
+def get_architect(name: str) -> Architect:
     """Get an architect instance by name.
 
     Args:
@@ -51,7 +49,7 @@ def get_architect(name: str) -> "Architect":
     return architects[name]()
 
 
-def get_narrator(name: str) -> "Narrator":
+def get_narrator(name: str) -> Narrator:
     """Get a narrator instance by name.
 
     Args:
@@ -98,7 +96,7 @@ def discover_editors() -> dict[str, type]:
     return {ep.name: ep.load() for ep in eps}
 
 
-def get_editor(name: str) -> "Editor":
+def get_editor(name: str) -> Editor:
     """Get an editor instance by name.
 
     Args:
@@ -126,7 +124,7 @@ def list_editors() -> list[str]:
     return sorted(discover_editors().keys())
 
 
-def discover_character_agent_types() -> dict[str, "CharacterAgentType"]:
+def discover_character_agent_types() -> dict[str, CharacterAgentType]:
     """Discover all registered character agent types from installed packages.
 
     Returns:
@@ -136,7 +134,7 @@ def discover_character_agent_types() -> dict[str, "CharacterAgentType"]:
     return {ep.name: ep.load()() for ep in eps}
 
 
-def get_character_agent_type(name: str) -> "CharacterAgentType":
+def get_character_agent_type(name: str) -> CharacterAgentType:
     """Get a character agent type instance by name.
 
     Args:

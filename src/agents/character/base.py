@@ -6,8 +6,6 @@ agent implementations.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import structlog
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
@@ -19,11 +17,8 @@ from agents.character.protocols import (
     SpeakInput,
     ThinkInput,
 )
-from models import CharacterMemory
-
-if TYPE_CHECKING:
-    from models import CharacterProfile
-    from tools.registry import ToolRegistry
+from models import CharacterMemory, CharacterProfile
+from tools.registry import ToolRegistry
 
 log = structlog.get_logger(__name__)
 
@@ -39,7 +34,7 @@ class BaseCharacterAgent:
     def __init__(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         personality_description: str,
         instructions: str,
         initial_memory: CharacterMemory | None = None,
@@ -97,7 +92,7 @@ Responses should feel authentic to who this character is."""
     def speak(
         self,
         input: SpeakInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Generate dialogue in character.
 
@@ -167,7 +162,7 @@ Generate {name}'s dialogue response. Include the emotional state this response r
     def think(
         self,
         input: ThinkInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Generate internal thoughts in character.
 
@@ -232,7 +227,7 @@ Generate {name}'s internal thoughts about this situation.""",
     def choose(
         self,
         input: ChooseInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Make a decision in character.
 
@@ -303,7 +298,7 @@ What does {name} choose and why?""",
     def answer(
         self,
         input: AnswerInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Answer a question from another agent.
 

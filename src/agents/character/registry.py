@@ -6,15 +6,13 @@ instances, their creation, and memory persistence across scenes.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import structlog
-
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from agents.character.protocols import CharacterAgent, CharacterAgentType
-    from models import CharacterMemory, CharacterProfile
+from agents.character.protocols import CharacterAgent, CharacterAgentType
+from models import CharacterMemory, CharacterProfile
 
 log = structlog.get_logger(__name__)
 
@@ -34,12 +32,12 @@ class CharacterRegistry(BaseModel):
                          types will be discovered via entry points.
         """
         self._agent_types = agent_types or {}
-        self._characters: dict[str, "CharacterAgent"] = {}
+        self._characters: dict[str, CharacterAgent] = {}
 
     def register_agent_type(
         self,
         name: str,
-        agent_type: "CharacterAgentType",
+        agent_type: CharacterAgentType,
     ) -> None:
         """Register a character agent type.
 
@@ -54,11 +52,11 @@ class CharacterRegistry(BaseModel):
         self,
         character_id: str,
         type_name: str,
-        profile: "CharacterProfile",
+        profile: CharacterProfile,
         properties: dict[str, Any],
         instructions: str,
-        memory: "CharacterMemory | None" = None,
-    ) -> "CharacterAgent":
+        memory: CharacterMemory | None = None,
+    ) -> CharacterAgent:
         """Create and register a character agent instance.
 
         Args:
@@ -100,7 +98,7 @@ class CharacterRegistry(BaseModel):
 
         return character
 
-    def get_character(self, character_id: str) -> "CharacterAgent":
+    def get_character(self, character_id: str) -> CharacterAgent:
         """Get a character agent by ID.
 
         Args:
@@ -133,7 +131,7 @@ class CharacterRegistry(BaseModel):
         """
         return list(self._characters.keys())
 
-    def get_all_memories(self) -> dict[str, "CharacterMemory"]:
+    def get_all_memories(self) -> dict[str, CharacterMemory]:
         """Get all character memories for persistence.
 
         Returns:
@@ -143,7 +141,7 @@ class CharacterRegistry(BaseModel):
 
     def restore_memories(
         self,
-        memories: dict[str, "CharacterMemory"],
+        memories: dict[str, CharacterMemory],
     ) -> None:
         """Restore character memories from persistence.
 
@@ -176,7 +174,7 @@ class CharacterRegistry(BaseModel):
         """
         return sorted(self._agent_types.keys())
 
-    def get_agent_type(self, name: str) -> "CharacterAgentType":
+    def get_agent_type(self, name: str) -> CharacterAgentType:
         """Get an agent type by name.
 
         Args:

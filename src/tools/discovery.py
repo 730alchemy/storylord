@@ -5,10 +5,8 @@ from installed packages that register entry points.
 """
 
 from importlib.metadata import entry_points
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from tools.protocols import Tool
+from tools.protocols import Tool
 
 
 def discover_tools() -> dict[str, type]:
@@ -21,7 +19,7 @@ def discover_tools() -> dict[str, type]:
     return {ep.name: ep.load() for ep in eps}
 
 
-def get_tool(name: str) -> "Tool":
+def get_tool(name: str) -> Tool:
     """Get a tool instance by name.
 
     Args:

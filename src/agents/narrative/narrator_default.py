@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import structlog
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 
+from agents.character.registry import CharacterRegistry
 from models import (
     BeatNarration,
     CharacterProfile,
@@ -17,10 +16,7 @@ from models import (
     PlotEvent,
     StoryBeat,
 )
-
-if TYPE_CHECKING:
-    from agents.character.registry import CharacterRegistry
-    from tools.registry import ToolRegistry
+from tools.registry import ToolRegistry
 
 log = structlog.get_logger(__name__)
 
@@ -124,8 +120,8 @@ class DefaultNarrator:
     def generate(
         self,
         input: NarratorInput,
-        tools: "ToolRegistry | None" = None,
-        character_registry: "CharacterRegistry | None" = None,
+        tools: ToolRegistry | None = None,
+        character_registry: CharacterRegistry | None = None,
     ) -> NarratedStory:
         """Generate complete narrative prose from a story architecture.
 

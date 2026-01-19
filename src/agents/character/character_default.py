@@ -6,12 +6,10 @@ like assertiveness, warmth, formality, verbosity, and emotionality.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from agents.character.base import BaseCharacterAgent
-
-if TYPE_CHECKING:
-    from models import CharacterMemory, CharacterProfile
+from models import CharacterMemory, CharacterProfile
 
 
 DEFAULT_PROPERTY_SCHEMA: dict[str, Any] = {
@@ -144,10 +142,10 @@ class DefaultCharacterAgent(BaseCharacterAgent):
     def __init__(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         properties: dict[str, Any],
         instructions: str,
-        initial_memory: "CharacterMemory | None" = None,
+        initial_memory: CharacterMemory | None = None,
     ):
         """Initialize the default character agent.
 
@@ -188,10 +186,10 @@ class DefaultCharacterAgentType:
     def create_instance(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         type_properties: dict[str, Any],
         instructions: str,
-        initial_memory: "CharacterMemory | None" = None,
+        initial_memory: CharacterMemory | None = None,
     ) -> DefaultCharacterAgent:
         """Create a default character agent instance.
 

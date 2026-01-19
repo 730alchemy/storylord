@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import structlog
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 
 from models import ArchitectInput, PlotEvent, StoryArchitecture
-
-if TYPE_CHECKING:
-    from tools.registry import ToolRegistry
+from tools.registry import ToolRegistry
 
 log = structlog.get_logger(__name__)
 

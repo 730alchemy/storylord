@@ -7,13 +7,12 @@ other agents.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel
 
-if TYPE_CHECKING:
-    from models import CharacterMemory, CharacterProfile
-    from tools.registry import ToolRegistry
+from models import CharacterMemory, CharacterProfile
+from tools.registry import ToolRegistry
 
 
 class SpeakInput(BaseModel):
@@ -77,11 +76,11 @@ class CharacterAgentType(Protocol):
     def create_instance(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         type_properties: dict[str, Any],
         instructions: str,
-        initial_memory: "CharacterMemory | None" = None,
-    ) -> "CharacterAgent":
+        initial_memory: CharacterMemory | None = None,
+    ) -> CharacterAgent:
         """Create a configured character agent instance.
 
         Args:
@@ -105,12 +104,12 @@ class CharacterAgent(Protocol):
     """
 
     character_id: str
-    memory: "CharacterMemory"
+    memory: CharacterMemory
 
     def speak(
         self,
         input: SpeakInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Generate dialogue in character.
 
@@ -126,7 +125,7 @@ class CharacterAgent(Protocol):
     def think(
         self,
         input: ThinkInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Generate internal thoughts in character.
 
@@ -142,7 +141,7 @@ class CharacterAgent(Protocol):
     def choose(
         self,
         input: ChooseInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Make a decision in character.
 
@@ -158,7 +157,7 @@ class CharacterAgent(Protocol):
     def answer(
         self,
         input: AnswerInput,
-        tools: "ToolRegistry | None" = None,
+        tools: ToolRegistry | None = None,
     ) -> CharacterResponse:
         """Answer a question from another agent.
 

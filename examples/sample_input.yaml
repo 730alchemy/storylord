@@ -7,6 +7,14 @@ characters:
     motivations: "Curiosity and passion for the truth sometimes get the better of him"
     relationships: "Best friends with Jasper, but also a bit of a rival"
     backstory: "Sometimes Elijah loses track of the world around him."
+    agent_config:
+      agent_type: "mbti"
+      agent_properties:
+        extroversion: 40
+        intuition: 70
+        thinking: 50
+        judging: 35
+      agent_instructions: ""
 
   - name: "Jasper Dilsack"
     description: "30 year old lawyer with a passion for winning more than justice. He is smart and charismatic, but also a bit of a know-it-all."

@@ -7,12 +7,10 @@ Thinking/Feeling, and Judging/Perceiving.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from agents.character.base import BaseCharacterAgent
-
-if TYPE_CHECKING:
-    from models import CharacterMemory, CharacterProfile
+from models import CharacterMemory, CharacterProfile
 
 
 MBTI_PROPERTY_SCHEMA: dict[str, Any] = {
@@ -187,10 +185,10 @@ class MBTICharacterAgent(BaseCharacterAgent):
     def __init__(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         properties: dict[str, Any],
         instructions: str,
-        initial_memory: "CharacterMemory | None" = None,
+        initial_memory: CharacterMemory | None = None,
     ):
         """Initialize the MBTI character agent.
 
@@ -232,10 +230,10 @@ class MBTICharacterAgentType:
     def create_instance(
         self,
         character_id: str,
-        character_profile: "CharacterProfile",
+        character_profile: CharacterProfile,
         type_properties: dict[str, Any],
         instructions: str,
-        initial_memory: "CharacterMemory | None" = None,
+        initial_memory: CharacterMemory | None = None,
     ) -> MBTICharacterAgent:
         """Create an MBTI character agent instance.
 
