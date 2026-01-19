@@ -1,11 +1,11 @@
 """StoryLord TUI application."""
 
+from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Center, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Footer, Input, Select, Static, TextArea
-from textual import work
 from textual.worker import get_current_worker
 
 from agents.discovery import (
@@ -113,11 +113,20 @@ class FileInputModal(ModalScreen[str | None]):
         Binding("ctrl+q", "app.quit", "Quit"),
     ]
 
+    def __init__(self, placeholder: str = "/path/to/file.txt") -> None:
+        """Initialize the file input modal.
+
+        Args:
+            placeholder: Placeholder text for the input field.
+        """
+        super().__init__()
+        self._placeholder = placeholder
+
     def compose(self) -> ComposeResult:
         with Center():
             with Vertical():
                 yield Static("Enter file path:")
-                yield Input(id="file-path-input", placeholder="/path/to/file.txt")
+                yield Input(id="file-path-input", placeholder=self._placeholder)
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle enter key in the input."""
@@ -168,6 +177,7 @@ class StoryLordApp(App):
     BINDINGS = [
         Binding("ctrl+a", "show_agents", "Agents"),
         Binding("ctrl+e", "show_editor", "Editor"),
+        Binding("ctrl+s", "show_character_studio", "Characters"),
         Binding("ctrl+q", "quit", "Quit"),
     ]
 
@@ -182,3 +192,9 @@ class StoryLordApp(App):
     def action_show_editor(self) -> None:
         """Show the editor screen."""
         self.push_screen(EditorScreen())
+
+    def action_show_character_studio(self) -> None:
+        """Show the character studio screen."""
+        from tui.character_studio import CharacterStudioScreen
+
+        self.push_screen(CharacterStudioScreen())
