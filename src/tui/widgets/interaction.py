@@ -116,7 +116,9 @@ class InteractionPane(Vertical):
     def on_mount(self) -> None:
         """Initialize the pane when mounted."""
         self._hide_form()
+        # Setup inputs first
         self._setup_input_fields()
+        # Then refresh display which might show/hide things
         self.refresh_display()
 
     def _hide_form(self) -> None:
@@ -314,7 +316,9 @@ class InteractionPane(Vertical):
         try:
             response = agent.think(think_input)
             if not worker.is_cancelled:
-                self.app.call_from_thread(self._handle_generic_response, response, "thought")
+                self.app.call_from_thread(
+                    self._handle_generic_response, response, "thought"
+                )
         except Exception as e:
             if not worker.is_cancelled:
                 self.app.call_from_thread(self._handle_error, str(e))
@@ -349,7 +353,9 @@ class InteractionPane(Vertical):
         try:
             response = agent.choose(choose_input)
             if not worker.is_cancelled:
-                self.app.call_from_thread(self._handle_generic_response, response, "chose")
+                self.app.call_from_thread(
+                    self._handle_generic_response, response, "chose"
+                )
         except Exception as e:
             if not worker.is_cancelled:
                 self.app.call_from_thread(self._handle_error, str(e))
@@ -379,7 +385,9 @@ class InteractionPane(Vertical):
         try:
             response = agent.answer(answer_input)
             if not worker.is_cancelled:
-                self.app.call_from_thread(self._handle_generic_response, response, "answered")
+                self.app.call_from_thread(
+                    self._handle_generic_response, response, "answered"
+                )
         except Exception as e:
             if not worker.is_cancelled:
                 self.app.call_from_thread(self._handle_error, str(e))

@@ -37,9 +37,7 @@ class AgentConfigPane(Vertical):
             yield Static("Agent Type:", classes="form-label")
 
             # Create select options from discovered agent types
-            agent_type_options = [
-                (name, name) for name in list_character_agent_types()
-            ]
+            agent_type_options = [(name, name) for name in list_character_agent_types()]
             if not agent_type_options:
                 agent_type_options = [("default", "default")]
 
@@ -56,7 +54,9 @@ class AgentConfigPane(Vertical):
             yield TextArea(id="agent-instructions")
 
             with Horizontal(classes="button-row"):
-                yield Button("Save Agent Config", id="btn-save-agent", variant="primary")
+                yield Button(
+                    "Save Agent Config", id="btn-save-agent", variant="primary"
+                )
 
     def on_mount(self) -> None:
         """Initialize the pane when mounted."""
@@ -101,9 +101,9 @@ class AgentConfigPane(Vertical):
                         select.value = agent_config.agent_type
                     finally:
                         self._refreshing = was_refreshing
-            self.query_one("#agent-instructions", TextArea).text = (
-                agent_config.agent_instructions
-            )
+            self.query_one(
+                "#agent-instructions", TextArea
+            ).text = agent_config.agent_instructions
             # Refresh properties with existing values (this will clear the refreshing flag)
             self._refresh_properties(agent_config.agent_properties)
         else:
@@ -113,14 +113,14 @@ class AgentConfigPane(Vertical):
         """Refresh the properties container based on the selected agent type."""
         if self._refreshing:
             return  # Prevent re-entrancy
-        
+
         self._refreshing = True
         try:
             container = self.query_one("#properties-container", Vertical)
 
             # Clear the dict first to avoid stale references
             self._property_inputs.clear()
-            
+
             # Get the selected agent type's schema first
             select = self.query_one("#agent-type-select", Select)
             agent_type_name = select.value
@@ -141,7 +141,7 @@ class AgentConfigPane(Vertical):
 
             # Get IDs of widgets we need to create
             needed_ids = {f"prop-{name}" for name in properties.keys()}
-            
+
             # Remove widgets that are no longer needed or will be replaced
             # Query and remove by ID to ensure they're properly removed
             widgets_to_remove = []
@@ -152,16 +152,16 @@ class AgentConfigPane(Vertical):
                         widgets_to_remove.append(widget)
                 except Exception:
                     pass
-            
+
             # Also remove any other prop- widgets
             for child in list(container.children):
-                if hasattr(child, 'id') and child.id and child.id.startswith("prop-"):
+                if hasattr(child, "id") and child.id and child.id.startswith("prop-"):
                     if child not in widgets_to_remove:
                         widgets_to_remove.append(child)
-                elif not hasattr(child, 'id') or not child.id:
+                elif not hasattr(child, "id") or not child.id:
                     # Remove Static labels that don't have IDs
                     widgets_to_remove.append(child)
-            
+
             # Remove all widgets
             for widget in widgets_to_remove:
                 widget.remove()
@@ -182,7 +182,6 @@ class AgentConfigPane(Vertical):
         """Mount property widgets after removals have completed."""
         try:
             for prop_name, prop_schema in properties.items():
-                prop_type = prop_schema.get("type", "string")
                 default_value = prop_schema.get("default", "")
                 description = prop_schema.get("description", "")
 
@@ -195,7 +194,7 @@ class AgentConfigPane(Vertical):
                     label_text = f"{prop_name} ({description})"
 
                 prop_id = f"prop-{prop_name}"
-                
+
                 # Check if widget already exists - if so, remove it first
                 try:
                     existing_widget = container.query_one(f"#{prop_id}", default=None)
@@ -204,17 +203,22 @@ class AgentConfigPane(Vertical):
                         # Schedule mounting this widget after removal
                         self.app.call_later(
                             lambda: self._mount_single_property_widget(
-                                container, prop_name, prop_schema, value, prop_id, label_text
+                                container,
+                                prop_name,
+                                prop_schema,
+                                value,
+                                prop_id,
+                                label_text,
                             )
                         )
                         continue
                 except Exception:
                     pass  # Widget doesn't exist, proceed
-                
+
                 self._mount_single_property_widget(
                     container, prop_name, prop_schema, value, prop_id, label_text
                 )
-                
+
         finally:
             self._refreshing = False
 
@@ -233,7 +237,7 @@ class AgentConfigPane(Vertical):
             existing_widget = container.query_one(f"#{prop_id}", default=None)
             if existing_widget:
                 return  # Widget exists, skip
-            
+
             label = Static(f"{label_text}:", classes="form-label")
             container.mount(label)
 

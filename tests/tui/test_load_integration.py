@@ -1,14 +1,11 @@
 """Integration tests for file loading workflow in Character Studio."""
 
-from pathlib import Path
-
 import pytest
 from textual.widgets import DataTable, Input
 
 from tests.tui.test_helpers import assert_text_visible, get_screen_text
 from tui.app import FileInputModal, StoryLordApp
 from tui.character_studio import CharacterStudioScreen
-from tui.widgets.character_list import CharacterListPane
 from tui.widgets.character_profile import CharacterProfilePane
 
 
@@ -66,7 +63,6 @@ async def test_ctrl_l_loads_file_and_displays_data(sample_yaml_path):
         # Verify Profile tab shows character data
         await pilot.press("ctrl+2")
         await pilot.pause()
-        screen_text = get_screen_text(pilot)
         assert_text_visible(pilot, "Elijah")
 
         # Verify form fields are populated
@@ -76,13 +72,11 @@ async def test_ctrl_l_loads_file_and_displays_data(sample_yaml_path):
         # Verify Agent tab shows agent config
         await pilot.press("ctrl+3")
         await pilot.pause()
-        screen_text = get_screen_text(pilot)
         assert_text_visible(pilot, "Agent")
 
         # Verify Interact tab shows interaction form
         await pilot.press("ctrl+4")
         await pilot.pause()
-        screen_text = get_screen_text(pilot)
         assert_text_visible(pilot, "Function")
 
 

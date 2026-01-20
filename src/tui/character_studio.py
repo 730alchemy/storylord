@@ -8,7 +8,7 @@ from typing import Any
 import yaml
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Vertical
+from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
     DataTable,
@@ -250,10 +250,14 @@ class CharacterStudioScreen(ModalScreen):
 
     #interact-form, #profile-form, #agent-form {
         height: auto;
+        min-height: 100%;
+        width: 100%;
     }
 
     #speak-inputs, #think-inputs, #choose-inputs, #answer-inputs {
         height: auto;
+        min-height: 5;
+        width: 100%;
     }
 
     .button-row {
@@ -342,11 +346,11 @@ class CharacterStudioScreen(ModalScreen):
             try:
                 loaded = self.state.load_from_yaml(Path(file_path))
                 self.notify(f"Loaded {len(loaded)} characters")
-                
+
                 # Switch to Characters tab FIRST to ensure table is visible
                 tabs = self.query_one(TabbedContent)
                 tabs.active = "tab-characters"
-                
+
                 # Use call_later to ensure tab switch completes before refreshing
                 def refresh_after_tab_switch():
                     try:
@@ -354,14 +358,16 @@ class CharacterStudioScreen(ModalScreen):
                         if list_pane:
                             list_pane.refresh_list()
                             # Also ensure the table is visible
-                            table = list_pane.query_one("#character-table", DataTable, default=None)
+                            table = list_pane.query_one(
+                                "#character-table", DataTable, default=None
+                            )
                             if table:
                                 table.display = True
                                 table.visible = True
                                 table.refresh()
                     except Exception as e:
                         self.notify(f"Error refreshing list: {e}", severity="error")
-                
+
                 self.app.call_later(refresh_after_tab_switch)
 
                 # Auto-select first character and refresh all panes

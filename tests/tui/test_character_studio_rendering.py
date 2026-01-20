@@ -1,16 +1,11 @@
 """Tests for Character Studio TUI rendering and display."""
 
-from pathlib import Path
-
 import pytest
-from textual.widgets import DataTable, Input, Static, TextArea
+from textual.widgets import DataTable, Input, TextArea
 
 from tests.tui.test_helpers import (
-    assert_text_visible,
     get_rendered_text,
     get_screen_text,
-    get_widget_text_by_id,
-    wait_for_text,
 )
 from tui.app import FileInputModal, StoryLordApp
 from tui.character_studio import CharacterStudioScreen
@@ -18,8 +13,6 @@ from tui.widgets.agent_config import AgentConfigPane
 from tui.widgets.character_list import CharacterListPane
 from tui.widgets.character_profile import CharacterProfilePane
 from tui.widgets.interaction import InteractionPane
-from tui.widgets.interaction import InteractionPane
-from tui.widgets.agent_config import AgentConfigPane
 
 
 async def open_character_studio(pilot):
@@ -65,7 +58,7 @@ async def test_load_file_workflow(sample_yaml_path):
 
         # Verify we're back to Character Studio
         assert isinstance(pilot.app.screen, CharacterStudioScreen)
-        
+
         # Note: There's a known bug in agent_config.py where refreshing properties
         # can cause duplicate widget IDs. We avoid switching to Agent tab to work around this.
         # The bug occurs when agent type changes trigger property refresh before old widgets are removed.
@@ -81,7 +74,7 @@ async def test_load_file_workflow(sample_yaml_path):
         # Verify table has the character data
         # Check that table has the expected number of rows
         assert table.row_count == 3
-        
+
         # Verify characters are in state (more reliable than checking rendered table)
         assert "Elijah Boondog" in screen.state.profiles
         assert "Jasper Dilsack" in screen.state.profiles
@@ -113,7 +106,6 @@ async def test_load_file_shows_profile_data(sample_yaml_path):
         await pilot.pause()
 
         # Verify profile form is visible (character should be auto-selected)
-        profile_pane = screen.query_one(CharacterProfilePane)
         form = screen.query_one("#profile-form")
         assert form.display is True
 
@@ -160,7 +152,7 @@ async def test_create_character_workflow():
         # Trigger the button press handler
         create_button = screen.query_one("#btn-create")
         from textual.widgets import Button
-        
+
         # Simulate button press event
         list_pane.on_button_pressed(Button.Pressed(create_button))
         await pilot.pause(0.5)  # Give time for character to be created
@@ -170,7 +162,7 @@ async def test_create_character_workflow():
         # Refresh list to ensure table is updated
         list_pane.refresh_list()
         await pilot.pause()
-        
+
         # Verify character is in state
         assert "Test Hero" in screen.state.profiles
         # Verify table has the row
@@ -190,11 +182,12 @@ async def test_create_character_appears_in_profile_tab():
         name_input = screen.query_one("#new-name", Input)
         name_input.value = "Profile Test"
         await pilot.pause()
-        
+
         # Trigger the button press handler directly
         list_pane = screen.query_one(CharacterListPane)
         create_button = screen.query_one("#btn-create")
         from textual.widgets import Button
+
         list_pane.on_button_pressed(Button.Pressed(create_button))
         await pilot.pause(0.5)
 
@@ -205,7 +198,7 @@ async def test_create_character_appears_in_profile_tab():
         # Verify character was created and selected
         assert "Profile Test" in screen.state.profiles
         assert screen.state.selected_character == "Profile Test"
-        
+
         # Refresh profile display to ensure form is updated
         profile_pane = screen.query_one(CharacterProfilePane)
         profile_pane.refresh_display()
@@ -271,7 +264,9 @@ async def test_profile_tab_renders_character_data(sample_yaml_path):
 
         # Verify character name appears in rendered output
         screen_text = get_screen_text(pilot)
-        assert "Elijah Boondog" in screen_text or "elijah boondog" in screen_text.lower()
+        assert (
+            "Elijah Boondog" in screen_text or "elijah boondog" in screen_text.lower()
+        )
 
         # Verify form fields are visible and populated
         form = screen.query_one("#profile-form")
@@ -303,17 +298,16 @@ async def test_agent_tab_renders_agent_config(sample_yaml_path):
         await pilot.pause()
 
         # Refresh agent config display
-        agent_pane = screen.query_one("#agent-form")
         await pilot.pause()
 
         # Verify character is selected and agent form should be visible
         assert screen.state.selected_character == "Elijah Boondog"
-        
+
         # Refresh display to ensure form is shown
         agent_config_pane = screen.query_one(AgentConfigPane)
         agent_config_pane.refresh_display()
         await pilot.pause()
-        
+
         # Verify agent form is visible
         agent_form = screen.query_one("#agent-form")
         assert agent_form.display is True
@@ -340,17 +334,16 @@ async def test_interact_tab_renders_interaction_form(sample_yaml_path):
         await pilot.pause()
 
         # Refresh interaction display
-        interact_pane = screen.query_one("#interact-form")
         await pilot.pause()
 
         # Verify character is selected
         assert screen.state.selected_character == "Elijah Boondog"
-        
+
         # Refresh display to ensure form is shown
         interact_pane_widget = screen.query_one(InteractionPane)
         interact_pane_widget.refresh_display()
         await pilot.pause()
-        
+
         # Verify interact form is visible
         interact_form = screen.query_one("#interact-form")
         assert interact_form.display is True

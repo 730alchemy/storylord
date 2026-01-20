@@ -136,6 +136,38 @@ def assert_text_visible(
         raise AssertionError(error_msg)
 
 
+def assert_widget_visible(
+    widget: Widget, min_height: int = 1, min_width: int = 1
+) -> None:
+    """Assert that a widget is visible and has meaningful dimensions.
+
+    Args:
+        widget: The widget to check.
+        min_height: Minimum expected height in terminal lines. Defaults to 1.
+        min_width: Minimum expected width in terminal columns. Defaults to 1.
+
+    Raises:
+        AssertionError: If widget is hidden or too small.
+    """
+    if not widget.display:
+        raise AssertionError(f"Widget {widget} display is False")
+
+    if not widget.visible:
+        raise AssertionError(f"Widget {widget} visible is False")
+
+    # Check dimensions
+    # .region includes layout position and size
+    if widget.region.height < min_height:
+        raise AssertionError(
+            f"Widget {widget} height {widget.region.height} is less than minimum {min_height}"
+        )
+
+    if widget.region.width < min_width:
+        raise AssertionError(
+            f"Widget {widget} width {widget.region.width} is less than minimum {min_width}"
+        )
+
+
 async def wait_for_text(
     pilot: "Pilot", text: str, timeout: float = 2.0, case_sensitive: bool = False
 ) -> bool:

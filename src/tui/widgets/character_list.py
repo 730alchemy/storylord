@@ -148,6 +148,8 @@ class CharacterListPane(Vertical):
         form = self.query_one("#new-character-form")
         form.display = False
         self._showing_new_form = False
+        # Force a refresh to ensure styles are updated
+        self.refresh(layout=True)
 
     def action_new_character(self) -> None:
         """Show the new character form."""
