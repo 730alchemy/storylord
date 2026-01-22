@@ -28,6 +28,7 @@ mbti = "agents.character.character_mbti:MBTICharacterAgentType"
 distribution = true
 
 [tool.pdm.scripts]
+bootstrap = "bash scripts/bootstrap.sh"
 health = { composite = [
   "echo '\nCheck project for PDM problems\n----------'",
   "pdm fix --dry-run",
