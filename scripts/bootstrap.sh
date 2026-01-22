@@ -32,6 +32,12 @@ have() {
   command -v "$1" >/dev/null 2>&1
 }
 
+PIPX_HOME="${PIPX_HOME:-$HOME/.local/pipx}"
+PIPX_BIN_DIR="${PIPX_BIN_DIR:-$HOME/.local/bin}"
+export PIPX_HOME
+export PIPX_BIN_DIR
+export PATH="$PIPX_BIN_DIR:$PATH"
+
 PYTHON_BIN="${PYTHON_BIN:-python3.13}"
 
 if ! have "$PYTHON_BIN"; then
@@ -49,21 +55,22 @@ if [[ "$PYTHON_VERSION" != "3.13" ]]; then
   die "Python 3.13 is required. Found $PYTHON_VERSION at $PYTHON_BIN."
 fi
 
-if ! "$PYTHON_BIN" -m pip --version >/dev/null 2>&1; then
-  die "pip is not available for $PYTHON_BIN. Install pip and retry. (sudo apt install python3-pip)"
-fi
-
-if ! have pdm; then
-  log "pdm not found; installing..."
-  if have pipx; then
-    pipx install pdm
+PIPX_CMD="pipx"
+if ! have pipx; then
+  if "$PYTHON_BIN" -m pipx --version >/dev/null 2>&1; then
+    PIPX_CMD="$PYTHON_BIN -m pipx"
   else
-    "$PYTHON_BIN" -m pip install --user pdm
+    die "pipx is required to install pdm. Install pipx and ensure $PIPX_BIN_DIR is on PATH, then retry."
   fi
 fi
 
 if ! have pdm; then
-  die "pdm is still not available on PATH. Ensure your user base bin directory is on PATH and retry."
+  log "pdm not found; installing with pipx..."
+  $PIPX_CMD install pdm
+fi
+
+if ! have pdm; then
+  die "pdm is still not available on PATH. Ensure pipx's bin directory is on PATH and retry."
 fi
 
 export PDM_VENV_IN_PROJECT=1
