@@ -89,6 +89,11 @@ if ! have pdm; then
   die "pdm is still not available on PATH. Ensure pipx's bin directory is on PATH and retry."
 fi
 
+if "$PIPX_CMD" ensurepath >/dev/null 2>&1; then
+  log "Ensured pipx bin directory is on PATH for future shells."
+  log "If 'pdm' is not found in your current shell, run: export PATH=\"$PIPX_BIN_DIR:\$PATH\""
+fi
+
 export PDM_VENV_IN_PROJECT=1
 
 if [[ ! -d .venv ]]; then
