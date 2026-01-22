@@ -60,7 +60,23 @@ if ! have pipx; then
   if "$PYTHON_BIN" -m pipx --version >/dev/null 2>&1; then
     PIPX_CMD="$PYTHON_BIN -m pipx"
   else
-    die "pipx is required to install pdm. Install pipx and ensure $PIPX_BIN_DIR is on PATH, then retry."
+    log "pipx not found; bootstrapping with ensurepip/pip..."
+    if "$PYTHON_BIN" -m pip --version >/dev/null 2>&1; then
+      "$PYTHON_BIN" -m pip install --user pipx
+    elif "$PYTHON_BIN" -m ensurepip --version >/dev/null 2>&1; then
+      "$PYTHON_BIN" -m ensurepip --upgrade
+      "$PYTHON_BIN" -m pip install --user pipx
+    else
+      die "pipx is required to install pdm, but pip/ensurepip is unavailable. Install pipx via your system package manager and retry."
+    fi
+
+    if "$PYTHON_BIN" -m pipx --version >/dev/null 2>&1; then
+      PIPX_CMD="$PYTHON_BIN -m pipx"
+    elif have pipx; then
+      PIPX_CMD="pipx"
+    else
+      die "pipx installation failed or is not on PATH. Ensure $PIPX_BIN_DIR is on PATH and retry."
+    fi
   fi
 fi
 
