@@ -22,6 +22,14 @@ characters:
     motivations: "To keep Elijah safe from the town's secrets"
     relationships: "Best friends with Elijah. Although quite competitive with Elijah, he very much wants Elijah to be happy."
     backstory: "Jumped two grades in school, putting him in the same 7th grade class as Elijah."
+    agent_config:
+      agent_type: "mbti"
+      agent_properties:
+        extroversion: 90
+        intuition: 7
+        thinking: 1
+        judging: 99
+      agent_instructions: "use a lot of gen z slang"
 
   - name: "Riley Thorn"
     description: "A subtle manipulator. Plays chess in the small town park, hiding his alterior motives."

@@ -34,7 +34,9 @@ def run_story_generation(
 
     initial_state = {
         "story_input": story_input,
+        "run_id": "",
         "tool_registry": None,
+        "character_registry": None,
         "architecture": None,
         "narrated_story": None,
         "edited_narrations": [],
@@ -45,8 +47,12 @@ def run_story_generation(
         "narrative_saved": False,
     }
 
-    for event in graph.stream(initial_state, config=config):
-        log.info("node_completed", node=list(event.keys())[0])
+    try:
+        for event in graph.stream(initial_state, config=config):
+            log.info("node_completed", node=list(event.keys())[0])
+    except Exception:  # noqa: BLE001
+        log.exception("story_generation_failed")
+        raise
 
     return graph.get_state(config).values
 

@@ -1,3 +1,5 @@
 """Built-in tool implementations for storylord."""
 
-__all__ = []
+from tools.character_speak import CharacterSpeakTool
+
+__all__ = ["CharacterSpeakTool"]

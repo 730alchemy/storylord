@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import structlog
+import uuid
+
 from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from agents.character.registry import CharacterRegistry
+from graph.tool_loop import build_tool_loop
 from models import (
     BeatNarration,
     CharacterProfile,
@@ -16,6 +20,7 @@ from models import (
     PlotEvent,
     StoryBeat,
 )
+from tools.context import ToolExecutionContext
 from tools.registry import ToolRegistry
 
 log = structlog.get_logger(__name__)
@@ -31,6 +36,14 @@ When writing narrative:
 - Maintain consistent point of view
 - Create smooth transitions that flow naturally from previous narrative
 - Bring the story beat to life while staying true to its description
+
+Tool use:
+- When a character who has an agent should speak, call the tool "character_speak"
+- Use the tool output content verbatim as the character's spoken line
+- Only call tools for characters listed under "Agent-Enabled Characters"
+- If no characters are agent-enabled, do not call tools
+- Tool arguments must include: character_id (exact name), scene_context, prompt,
+  and conversation_history (use [] if none)
 
 You must generate narrative text that fulfills the story beat's requirements while maintaining \
 consistency with everything that has come before in the story."""
@@ -49,6 +62,10 @@ GENERATION_USER_TEMPLATE = """## Current Plot Event
 ## Characters in This Beat
 
 {involved_characters}
+
+## Agent-Enabled Characters
+
+{agent_characters}
 
 ## Tone
 
@@ -117,6 +134,9 @@ class DefaultNarrator:
 
     name = "default"
 
+    def __init__(self) -> None:
+        self._tool_loop = None
+
     def generate(
         self,
         input: NarratorInput,
@@ -132,18 +152,22 @@ class DefaultNarrator:
 
         Args:
             input: The narrator input parameters.
-            tools: Optional tool registry (not used by default narrator).
+            tools: Optional tool registry for tool-calling support.
             character_registry: Optional registry of character agent instances.
 
         Returns:
             A complete narrated story.
         """
         self._character_registry = character_registry
-        generation_chain = self._create_generation_chain()
+        generation_llm = self._create_generation_llm(tools)
+        generation_prompt = self._create_generation_prompt()
+        self._tool_loop = build_tool_loop(generation_llm)
         evaluation_chain = self._create_evaluation_chain()
 
         all_narrations: list[BeatNarration] = []
         plot_events = input.story_architecture.plot_events
+        run_id = getattr(input, "run_id", None) or uuid.uuid4().hex
+        tool_call_log: list[dict] = []
 
         for event_idx, plot_event in enumerate(plot_events):
             prior_events = plot_events[:event_idx]
@@ -152,6 +176,7 @@ class DefaultNarrator:
             for beat_idx, beat in enumerate(plot_event.beats):
                 beat_type, beat_description = self._format_story_beat(beat)
                 beat_reference = f"Event {event_idx + 1}, Beat {beat_idx + 1}"
+                trace_id = uuid.uuid4().hex
 
                 # Build context for generation
                 generation_context = {
@@ -162,6 +187,9 @@ class DefaultNarrator:
                     "involved_characters": self._format_involved_characters(
                         beat, input.characters
                     ),
+                    "agent_characters": self._format_agent_characters(
+                        character_registry
+                    ),
                     "tone": input.tone,
                     "prior_context": self._format_prior_context(
                         prior_events, plot_event, beat_idx
@@ -170,8 +198,26 @@ class DefaultNarrator:
                 }
 
                 # Iteration 1: Generate initial narrative
-                narration = generation_chain.invoke(generation_context)
-                narration.beat_reference = beat_reference
+                messages = generation_prompt.format_messages(**generation_context)
+                tool_context = ToolExecutionContext(
+                    character_registry=character_registry,
+                    run_id=run_id,
+                    trace_id=trace_id,
+                    beat_reference=beat_reference,
+                )
+                result = self._tool_loop.invoke(
+                    {
+                        "messages": messages,
+                        "tool_registry": tools,
+                        "tool_context": tool_context,
+                        "tool_call_log": [],
+                    }
+                )
+                tool_call_log.extend(result.get("tool_call_log", []))
+                narration_text = self._get_last_ai_content(result["messages"])
+                narration = BeatNarration(
+                    narrative_text=narration_text, beat_reference=beat_reference
+                )
                 log.info(
                     "beat_iteration_complete",
                     narrator=self.name,
@@ -231,19 +277,21 @@ class DefaultNarrator:
 
         return NarratedStory(narrations=all_narrations)
 
-    def _create_generation_chain(self):
-        """Create the LangChain chain for generating narrative prose."""
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
-        structured_llm = llm.with_structured_output(BeatNarration)
-
-        prompt = ChatPromptTemplate.from_messages(
+    def _create_generation_prompt(self):
+        """Create the prompt template for narrative generation."""
+        return ChatPromptTemplate.from_messages(
             [
                 ("system", GENERATION_SYSTEM_PROMPT),
                 ("user", GENERATION_USER_TEMPLATE),
             ]
         )
 
-        return prompt | structured_llm
+    def _create_generation_llm(self, tools: ToolRegistry | None):
+        """Create the LLM for narrative generation with tool support."""
+        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        if tools and len(tools) > 0:
+            return llm.bind_tools(tools.list_tools())
+        return llm
 
     def _create_evaluation_chain(self):
         """Create the LangChain chain for evaluating and revising narrative."""
@@ -285,6 +333,14 @@ class DefaultNarrator:
             lines.append(f"**Relationships:** {char.relationships}")
             lines.append("")
         return "\n".join(lines)
+
+    def _format_agent_characters(
+        self, character_registry: CharacterRegistry | None
+    ) -> str:
+        """Format list of characters that have agents available."""
+        if not character_registry or len(character_registry) == 0:
+            return "None."
+        return ", ".join(sorted(character_registry.list_characters()))
 
     def _format_prior_context(
         self,
@@ -342,3 +398,10 @@ class DefaultNarrator:
             lines.append(narration.narrative_text)
             lines.append("")
         return "\n".join(lines)
+
+    def _get_last_ai_content(self, messages: list[BaseMessage]) -> str:
+        """Return the last AI message content from a message list."""
+        for message in reversed(messages):
+            if isinstance(message, AIMessage):
+                return message.content or ""
+        return ""

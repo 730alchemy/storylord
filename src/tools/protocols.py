@@ -6,6 +6,8 @@ External packages can implement these protocols to create custom tools.
 
 from typing import Any, Protocol
 
+from tools.context import ToolExecutionContext
+
 
 class Tool(Protocol):
     """Protocol for tools that agents can use.
@@ -27,6 +29,14 @@ class Tool(Protocol):
         Returns:
             A dictionary containing the JSON schema for the tool's parameters.
         """
+        ...
+
+
+class ContextAwareTool(Protocol):
+    """Protocol for tools that accept runtime execution context."""
+
+    def configure(self, context: ToolExecutionContext) -> None:
+        """Provide runtime context to the tool before execution."""
         ...
 
     def execute(self, **params: Any) -> Any:

@@ -244,6 +244,7 @@ class NarratorInput(BaseModel):
     story_architecture: StoryArchitecture
     characters: list[CharacterProfile]
     tone: str
+    run_id: str | None = None
 
 
 class BeatNarration(BaseModel):

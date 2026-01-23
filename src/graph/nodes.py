@@ -1,5 +1,6 @@
 """Node functions for story generation graph."""
 
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -16,6 +17,7 @@ from agents.discovery import (
 from graph.delta import compute_text_delta
 from graph.state import StoryGenerationState
 from models import ArchitectInput, EditorInput, NarratorInput
+from tools.context import ToolExecutionContext
 from tools.registry import ToolRegistry
 
 log = structlog.get_logger(__name__)
@@ -24,7 +26,17 @@ log = structlog.get_logger(__name__)
 def load_input_node(state: StoryGenerationState) -> dict:
     """Initialize tool_registry, character_registry, and tracking flags."""
     story_input = state["story_input"]
-    tool_registry = ToolRegistry(story_input.tools) if story_input.tools else None
+    run_id = uuid.uuid4().hex
+    tool_names = list(story_input.tools or [])
+    if any(char.agent_config for char in story_input.characters):
+        if "character_speak" not in tool_names:
+            tool_names.append("character_speak")
+            log.info(
+                "tool_added",
+                tool="character_speak",
+                reason="character_agents_present",
+            )
+    tool_registry = ToolRegistry(tool_names) if tool_names else None
 
     # Create character registry and populate with characters that have agent_config
     agent_types = discover_character_agent_types()
@@ -40,7 +52,16 @@ def load_input_node(state: StoryGenerationState) -> dict:
                 instructions=char.agent_config.agent_instructions,
             )
 
+    if tool_registry:
+        tool_registry.configure(
+            ToolExecutionContext(
+                character_registry=character_registry,
+                run_id=run_id,
+            )
+        )
+
     return {
+        "run_id": run_id,
         "tool_registry": tool_registry,
         "character_registry": character_registry,
     }
@@ -98,6 +119,7 @@ def narrator_node(state: StoryGenerationState) -> dict:
         story_architecture=architecture,
         characters=story_input.characters,
         tone=story_input.tone,
+        run_id=state.get("run_id"),
     )
     narrated_story = narrator.generate(
         narrator_input,

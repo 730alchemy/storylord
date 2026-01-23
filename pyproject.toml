@@ -24,6 +24,9 @@ simile-smasher = "agents.editor.editor_simile_smasher:SimileSmasherEditor"
 default = "agents.character.character_default:DefaultCharacterAgentType"
 mbti = "agents.character.character_mbti:MBTICharacterAgentType"
 
+[project.entry-points."storylord.tools"]
+character_speak = "tools.character_speak:CharacterSpeakTool"
+
 [tool.pdm]
 distribution = true
 
