@@ -1,7 +1,12 @@
-# ADR: Storylord Tool Framework with Agent-Callable Tools
+# ADR: Storylord Tool Framework that Accommodates Tools that Call Agents
 
 ## Objective
-Define a tool framework for the entire Storylord application that enables tools to call other agents, preserves agent memory during a run, aligns with LangChain and LangGraph, and supports clear, easy auditing and tracing.
+Define a tool framework for the entire Storylord application that meets these requirements:
+
+- enable tools to call other agents
+- preserve and isolate tool-embedded agent memory during a run
+- align with LangChain and LangGraph
+- support clear, easy auditing and tracing
 
 ## Constraints
 - Must continue using LangChain and LangGraph.
@@ -12,9 +17,9 @@ Define a tool framework for the entire Storylord application that enables tools 
 
 ## Options
 
-### Incrementally improve the existing ToolRegistry
+### Incrementally improve the existing Tool Registry
 **Summary from conversation**
-Keep the current ToolRegistry and entry-point discovery, while adding context injection and custom orchestration to enable agent-calling tools and auditing.
+Keep the current Tool Registry and entry-point discovery, while adding context injection and custom orchestration to enable agent-calling tools and auditing.
 
 **Pros**
 - Minimal migration; preserves entry-point discovery and existing logging patterns.
