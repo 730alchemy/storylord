@@ -86,6 +86,15 @@ class TestListArchitects:
     """Tests for the list_architects function."""
 
     @patch("agents.discovery.discover_architects")
+    def test_list_architects_empty(self, mock_discover):
+        """Returns empty list when no architects are registered."""
+        mock_discover.return_value = {}
+
+        result = list_architects()
+
+        assert result == []
+
+    @patch("agents.discovery.discover_architects")
     def test_list_architects_returns_sorted(self, mock_discover):
         """Returns sorted list of architect names."""
         mock_discover.return_value = {"zebra": MagicMock, "alpha": MagicMock}
@@ -161,6 +170,15 @@ class TestListNarrators:
     """Tests for the list_narrators function."""
 
     @patch("agents.discovery.discover_narrators")
+    def test_list_narrators_empty(self, mock_discover):
+        """Returns empty list when no narrators are registered."""
+        mock_discover.return_value = {}
+
+        result = list_narrators()
+
+        assert result == []
+
+    @patch("agents.discovery.discover_narrators")
     def test_list_narrators_returns_sorted(self, mock_discover):
         """Returns sorted list of narrator names."""
         mock_discover.return_value = {"zebra": MagicMock, "alpha": MagicMock}
@@ -234,6 +252,15 @@ class TestGetEditor:
 
 class TestListEditors:
     """Tests for the list_editors function."""
+
+    @patch("agents.discovery.discover_editors")
+    def test_list_editors_empty(self, mock_discover):
+        """Returns empty list when no editors are registered."""
+        mock_discover.return_value = {}
+
+        result = list_editors()
+
+        assert result == []
 
     @patch("agents.discovery.discover_editors")
     def test_list_editors_returns_sorted(self, mock_discover):
@@ -314,6 +341,15 @@ class TestGetCharacterAgentType:
 
 class TestListCharacterAgentTypes:
     """Tests for the list_character_agent_types function."""
+
+    @patch("agents.discovery.discover_character_agent_types")
+    def test_list_character_agent_types_empty(self, mock_discover):
+        """Returns empty list when no character agent types are registered."""
+        mock_discover.return_value = {}
+
+        result = list_character_agent_types()
+
+        assert result == []
 
     @patch("agents.discovery.discover_character_agent_types")
     def test_list_character_agent_types_returns_sorted(self, mock_discover):

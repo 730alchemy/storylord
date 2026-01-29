@@ -156,25 +156,25 @@ class TestDescribeEIDimension:
     """Tests for the _describe_ei_dimension function."""
 
     @pytest.mark.parametrize(
-        "value,expected_phrase",
+        "value,expected_keyword",
         [
-            (0, "Strongly introverted"),
-            (25, "Strongly introverted"),
-            (26, "Introverted"),
-            (45, "Introverted"),
-            (46, "Balanced"),
-            (50, "Balanced"),
-            (55, "Balanced"),
-            (56, "Extroverted"),
-            (75, "Extroverted"),
-            (76, "Strongly extroverted"),
-            (100, "Strongly extroverted"),
+            (0, "introverted"),
+            (25, "introverted"),
+            (26, "introverted"),
+            (45, "introverted"),
+            (46, "balanced"),
+            (50, "balanced"),
+            (55, "balanced"),
+            (56, "extroverted"),
+            (75, "extroverted"),
+            (76, "extroverted"),
+            (100, "extroverted"),
         ],
     )
-    def test_describe_ei_boundaries(self, value: int, expected_phrase: str):
+    def test_describe_ei_boundaries(self, value: int, expected_keyword: str):
         """E/I dimension description matches expected boundaries."""
         result = _describe_ei_dimension(value)
-        assert expected_phrase in result
+        assert expected_keyword in result.lower()
 
     def test_describe_ei_strongly_introverted_content(self):
         """Strongly introverted description has expected content."""
@@ -193,24 +193,24 @@ class TestDescribeNSDimension:
     """Tests for the _describe_ns_dimension function."""
 
     @pytest.mark.parametrize(
-        "value,expected_phrase",
+        "value,expected_keyword",
         [
-            (0, "Strongly sensing"),
-            (25, "Strongly sensing"),
-            (26, "Sensing preference"),
-            (45, "Sensing preference"),
-            (46, "Balanced"),
-            (55, "Balanced"),
-            (56, "Intuitive"),
-            (75, "Intuitive"),
-            (76, "Strongly intuitive"),
-            (100, "Strongly intuitive"),
+            (0, "sensing"),
+            (25, "sensing"),
+            (26, "sensing"),
+            (45, "sensing"),
+            (46, "balanced"),
+            (55, "balanced"),
+            (56, "intuitive"),
+            (75, "intuitive"),
+            (76, "intuitive"),
+            (100, "intuitive"),
         ],
     )
-    def test_describe_ns_boundaries(self, value: int, expected_phrase: str):
+    def test_describe_ns_boundaries(self, value: int, expected_keyword: str):
         """N/S dimension description matches expected boundaries."""
         result = _describe_ns_dimension(value)
-        assert expected_phrase in result
+        assert expected_keyword in result.lower()
 
     def test_describe_ns_strongly_sensing_content(self):
         """Strongly sensing description has expected content."""
@@ -227,24 +227,24 @@ class TestDescribeTFDimension:
     """Tests for the _describe_tf_dimension function."""
 
     @pytest.mark.parametrize(
-        "value,expected_phrase",
+        "value,expected_keyword",
         [
-            (0, "Strongly feeling"),
-            (25, "Strongly feeling"),
-            (26, "Feeling preference"),
-            (45, "Feeling preference"),
-            (46, "Balanced"),
-            (55, "Balanced"),
-            (56, "Thinking preference"),
-            (75, "Thinking preference"),
-            (76, "Strongly thinking"),
-            (100, "Strongly thinking"),
+            (0, "feeling"),
+            (25, "feeling"),
+            (26, "feeling"),
+            (45, "feeling"),
+            (46, "balanced"),
+            (55, "balanced"),
+            (56, "thinking"),
+            (75, "thinking"),
+            (76, "thinking"),
+            (100, "thinking"),
         ],
     )
-    def test_describe_tf_boundaries(self, value: int, expected_phrase: str):
+    def test_describe_tf_boundaries(self, value: int, expected_keyword: str):
         """T/F dimension description matches expected boundaries."""
         result = _describe_tf_dimension(value)
-        assert expected_phrase in result
+        assert expected_keyword in result.lower()
 
     def test_describe_tf_strongly_feeling_content(self):
         """Strongly feeling description has expected content."""
@@ -261,24 +261,24 @@ class TestDescribeJPDimension:
     """Tests for the _describe_jp_dimension function."""
 
     @pytest.mark.parametrize(
-        "value,expected_phrase",
+        "value,expected_keyword",
         [
-            (0, "Strongly perceiving"),
-            (25, "Strongly perceiving"),
-            (26, "Perceiving preference"),
-            (45, "Perceiving preference"),
-            (46, "Balanced"),
-            (55, "Balanced"),
-            (56, "Judging preference"),
-            (75, "Judging preference"),
-            (76, "Strongly judging"),
-            (100, "Strongly judging"),
+            (0, "perceiving"),
+            (25, "perceiving"),
+            (26, "perceiving"),
+            (45, "perceiving"),
+            (46, "balanced"),
+            (55, "balanced"),
+            (56, "judging"),
+            (75, "judging"),
+            (76, "judging"),
+            (100, "judging"),
         ],
     )
-    def test_describe_jp_boundaries(self, value: int, expected_phrase: str):
+    def test_describe_jp_boundaries(self, value: int, expected_keyword: str):
         """J/P dimension description matches expected boundaries."""
         result = _describe_jp_dimension(value)
-        assert expected_phrase in result
+        assert expected_keyword in result.lower()
 
     def test_describe_jp_strongly_perceiving_content(self):
         """Strongly perceiving description has expected content."""

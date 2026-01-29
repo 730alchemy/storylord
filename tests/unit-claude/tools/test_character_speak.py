@@ -222,3 +222,9 @@ class TestCharacterSpeakToolExecute:
         )
 
         assert "dialogue" in result
+        mock_char = mock_registry.get_character.return_value
+        call_args = mock_char.speak.call_args[0][0]
+        assert call_args.scene_context == "A scene"
+        assert call_args.prompt == "Say hi"
+        assert call_args.conversation_history == []
+        assert not hasattr(call_args, "extra_param")

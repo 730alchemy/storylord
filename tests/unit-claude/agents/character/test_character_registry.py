@@ -5,20 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from agents.character.registry import CharacterRegistry
-from models import CharacterMemory, CharacterProfile
-
-
-@pytest.fixture
-def sample_profile() -> CharacterProfile:
-    """A sample character profile for testing."""
-    return CharacterProfile(
-        name="Test Character",
-        description="A test character",
-        role="protagonist",
-        motivations="Testing",
-        relationships="None",
-        backstory="Created for testing",
-    )
+from models import CharacterMemory
 
 
 @pytest.fixture
@@ -171,6 +158,31 @@ class TestCharacterRegistryCreateCharacter:
         call_kwargs = mock_agent_type.create_instance.call_args[1]
         assert call_kwargs["initial_memory"] is memory
 
+    def test_create_character_duplicate_id_overwrites(
+        self, mock_agent_type, sample_profile
+    ):
+        """Creating the same character_id twice overwrites the previous entry."""
+        registry = CharacterRegistry(agent_types={"mock": mock_agent_type})
+
+        first = registry.create_character(
+            character_id="char_1",
+            type_name="mock",
+            profile=sample_profile,
+            properties={},
+            instructions="first",
+        )
+        second = registry.create_character(
+            character_id="char_1",
+            type_name="mock",
+            profile=sample_profile,
+            properties={},
+            instructions="second",
+        )
+
+        assert len(registry) == 1
+        assert registry.get_character("char_1") is second
+        assert first is not second
+
 
 class TestCharacterRegistryGetCharacter:
     """Tests for CharacterRegistry.get_character() method."""
@@ -299,6 +311,27 @@ class TestCharacterRegistryRestoreMemories:
         mock_log.warning.assert_called_with(
             "memory_restore_skipped",
             character_id="nonexistent",
+            reason="character not found",
+        )
+
+    @patch("agents.character.registry.log")
+    def test_restore_memories_mixed_existing_and_missing(
+        self, mock_log, mock_agent_type, sample_profile
+    ):
+        """Existing memories are restored while missing IDs log warnings."""
+        registry = CharacterRegistry(agent_types={"mock": mock_agent_type})
+        registry.create_character("char_1", "mock", sample_profile, {}, "")
+
+        existing = CharacterMemory()
+        existing.add_knowledge(fact="Restored")
+        missing = CharacterMemory()
+
+        registry.restore_memories({"char_1": existing, "missing": missing})
+
+        assert registry.get_character("char_1").memory is existing
+        mock_log.warning.assert_called_with(
+            "memory_restore_skipped",
+            character_id="missing",
             reason="character not found",
         )
 

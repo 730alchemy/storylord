@@ -1,6 +1,23 @@
 """Unit tests for compute_text_delta in graph/delta.py."""
 
+import difflib
+
 from graph.delta import compute_text_delta
+
+
+def _expected_deltas(original: str, edited: str) -> list[dict]:
+    matcher = difflib.SequenceMatcher(None, original, edited)
+    return [
+        {"original": original[i1:i2], "edited": edited[j1:j2]}
+        for tag, i1, i2, j1, j2 in matcher.get_opcodes()
+        if tag != "equal"
+    ]
+
+
+def _assert_delta_matches_difflib(original: str, edited: str) -> list[dict]:
+    result = compute_text_delta(original, edited)
+    assert result == _expected_deltas(original, edited)
+    return result
 
 
 class TestComputeTextDelta:
@@ -8,17 +25,17 @@ class TestComputeTextDelta:
 
     def test_identical_texts_returns_empty_list(self):
         """Same text returns empty list."""
-        result = compute_text_delta("hello world", "hello world")
+        result = _assert_delta_matches_difflib("hello world", "hello world")
         assert result == []
 
     def test_empty_to_empty_returns_empty_list(self):
         """Empty string to empty string returns empty list."""
-        result = compute_text_delta("", "")
+        result = _assert_delta_matches_difflib("", "")
         assert result == []
 
     def test_single_character_replacement(self):
         """Single character replacement is detected."""
-        result = compute_text_delta("cat", "bat")
+        result = _assert_delta_matches_difflib("cat", "bat")
 
         assert len(result) == 1
         assert result[0]["original"] == "c"
@@ -26,19 +43,19 @@ class TestComputeTextDelta:
 
     def test_single_word_replacement(self):
         """Word replacement is detected."""
-        result = compute_text_delta("hello world", "hello there")
+        result = _assert_delta_matches_difflib("hello world", "hello there")
 
         # Verify changes were detected (difflib may split into multiple chunks)
         assert len(result) >= 1
-        # Verify the combined original text equals "world"
         combined_original = "".join(d["original"] for d in result)
         combined_edited = "".join(d["edited"] for d in result)
-        assert "world" not in "hello" + combined_edited
-        assert "there" not in "hello" + combined_original
+        assert combined_original
+        assert combined_edited
+        assert combined_original != combined_edited
 
     def test_insertion_only(self):
         """Insertion of new text is detected."""
-        result = compute_text_delta("hello", "hello world")
+        result = _assert_delta_matches_difflib("hello", "hello world")
 
         assert len(result) == 1
         assert result[0]["original"] == ""
@@ -46,7 +63,7 @@ class TestComputeTextDelta:
 
     def test_deletion_only(self):
         """Deletion of text is detected."""
-        result = compute_text_delta("hello world", "hello")
+        result = _assert_delta_matches_difflib("hello world", "hello")
 
         assert len(result) == 1
         assert result[0]["original"] == " world"
@@ -54,7 +71,7 @@ class TestComputeTextDelta:
 
     def test_complete_replacement(self):
         """Complete text replacement is detected."""
-        result = compute_text_delta("abc", "xyz")
+        result = _assert_delta_matches_difflib("abc", "xyz")
 
         assert len(result) == 1
         assert result[0]["original"] == "abc"
@@ -62,21 +79,19 @@ class TestComputeTextDelta:
 
     def test_multiple_changes(self):
         """Multiple disjoint changes are detected."""
-        result = compute_text_delta("the quick brown fox", "a quick red fox")
+        result = _assert_delta_matches_difflib("the quick brown fox", "a quick red fox")
 
         # Verify multiple changes were detected
         assert len(result) >= 2
-        # Verify the result when applied would produce the right output
         combined_original = "".join(d["original"] for d in result)
         combined_edited = "".join(d["edited"] for d in result)
-        # Original text contained "the" and "brown" which should be removed
-        assert "the" in combined_original or "brown" in combined_original
-        # Edited text should contain replacements
-        assert "a" in combined_edited or "red" in combined_edited
+        assert combined_original
+        assert combined_edited
+        assert combined_original != combined_edited
 
     def test_from_empty_string(self):
         """Insertion from empty string."""
-        result = compute_text_delta("", "new text")
+        result = _assert_delta_matches_difflib("", "new text")
 
         assert len(result) == 1
         assert result[0]["original"] == ""
@@ -84,7 +99,7 @@ class TestComputeTextDelta:
 
     def test_to_empty_string(self):
         """Deletion to empty string."""
-        result = compute_text_delta("old text", "")
+        result = _assert_delta_matches_difflib("old text", "")
 
         assert len(result) == 1
         assert result[0]["original"] == "old text"
@@ -92,7 +107,7 @@ class TestComputeTextDelta:
 
     def test_whitespace_change(self):
         """Whitespace changes are detected."""
-        result = compute_text_delta("hello world", "hello  world")
+        result = _assert_delta_matches_difflib("hello world", "hello  world")
 
         # Difflib detects this as an insertion of a space
         assert len(result) == 1
@@ -101,7 +116,7 @@ class TestComputeTextDelta:
 
     def test_newline_addition(self):
         """Newline changes are detected."""
-        result = compute_text_delta("line1line2", "line1\nline2")
+        result = _assert_delta_matches_difflib("line1line2", "line1\nline2")
 
         assert len(result) == 1
         assert result[0]["original"] == ""
@@ -109,7 +124,7 @@ class TestComputeTextDelta:
 
     def test_case_change(self):
         """Case changes are detected."""
-        result = compute_text_delta("Hello World", "hello world")
+        result = _assert_delta_matches_difflib("Hello World", "hello world")
 
         # H -> h and W -> w
         assert len(result) == 2
@@ -119,7 +134,7 @@ class TestComputeTextDelta:
 
     def test_unicode_characters(self):
         """Unicode characters are handled correctly."""
-        result = compute_text_delta("hello", "hello 🌍")
+        result = _assert_delta_matches_difflib("hello", "hello 🌍")
 
         assert len(result) == 1
         assert result[0]["original"] == ""
@@ -127,7 +142,7 @@ class TestComputeTextDelta:
 
     def test_unicode_replacement(self):
         """Unicode character replacement works."""
-        result = compute_text_delta("hello 🌍", "hello 🌎")
+        result = _assert_delta_matches_difflib("hello 🌍", "hello 🌎")
 
         assert len(result) == 1
         assert result[0]["original"] == "🌍"
@@ -138,19 +153,18 @@ class TestComputeTextDelta:
         original = "line 1\nline 2\nline 3"
         edited = "line 1\nmodified line\nline 3"
 
-        result = compute_text_delta(original, edited)
+        result = _assert_delta_matches_difflib(original, edited)
 
-        # Verify changes were detected
         assert len(result) >= 1
-        # Verify the combined changes reflect the modification
         combined_original = "".join(d["original"] for d in result)
         combined_edited = "".join(d["edited"] for d in result)
-        # The modification should be captured
-        assert "modified" in combined_edited or "line 2" in combined_original
+        assert combined_original
+        assert combined_edited
+        assert combined_original != combined_edited
 
     def test_preserves_order_of_changes(self):
         """Changes are returned in order of occurrence."""
-        result = compute_text_delta("aXbYc", "a1b2c")
+        result = _assert_delta_matches_difflib("aXbYc", "a1b2c")
 
         assert len(result) == 2
         assert result[0]["original"] == "X"

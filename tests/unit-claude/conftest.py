@@ -1,11 +1,20 @@
 """Shared fixtures for unit tests."""
 
-from typing import Any
-from unittest.mock import MagicMock
+from __future__ import annotations
+
+import sys
 
 import pytest
 
+from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock
 from models import CharacterMemory, CharacterProfile
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_PATH = str(PROJECT_ROOT / "src")
+if SRC_PATH not in sys.path:
+    sys.path.insert(0, SRC_PATH)
 
 
 @pytest.fixture

@@ -254,6 +254,7 @@ class TestCharacterMemoryGetSummary:
         summary = empty_memory.get_summary()
 
         assert "Current emotional state: neutral" in summary
+        assert "Recent events:" not in summary
 
     def test_get_summary_with_events(self, empty_memory: CharacterMemory):
         """Summary includes recent events."""
@@ -263,6 +264,16 @@ class TestCharacterMemoryGetSummary:
         assert "Recent events:" in summary
         assert "[spoke]" in summary
         assert "Hello there!" in summary
+
+    def test_get_summary_short_content_includes_ellipsis(
+        self, empty_memory: CharacterMemory
+    ):
+        """Even short content still includes ellipsis in summary formatting."""
+        empty_memory.add_interaction(event_type="spoke", content="Hi")
+        summary = empty_memory.get_summary()
+
+        assert "Hi" in summary
+        assert "Hi..." in summary
 
     def test_get_summary_max_events_parameter(self, empty_memory: CharacterMemory):
         """Summary respects max_events parameter."""
@@ -373,3 +384,24 @@ class TestCharacterMemoryGetEmotionalArc:
         assert "s3 -> s4 -> s5 -> s6 -> s7" in result
         assert "s1" not in result
         assert "s2" not in result
+
+
+class TestCharacterMemoryIsolation:
+    """Tests for mutable default isolation."""
+
+    def test_memory_instances_do_not_share_mutable_defaults(self):
+        """Lists and dicts should not be shared across instances."""
+        memory_a = CharacterMemory()
+        memory_b = CharacterMemory()
+
+        memory_a.add_interaction(event_type="spoke", content="Hello")
+        memory_a.add_knowledge(fact="Fact")
+        memory_a.update_relationship("Alice", sentiment="positive")
+
+        assert len(memory_a.events) == 1
+        assert len(memory_a.knowledge) == 1
+        assert "Alice" in memory_a.relationships
+
+        assert len(memory_b.events) == 0
+        assert len(memory_b.knowledge) == 0
+        assert memory_b.relationships == {}
