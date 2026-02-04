@@ -73,3 +73,30 @@ class CharacterStore:
 
         data = yaml.safe_load(path.read_text())
         return CharacterProfile.model_validate(data)
+
+    def exists(self, name: str) -> bool:
+        """Check whether a character exists in the library.
+
+        Args:
+            name: The character's name. Slugified internally to resolve
+                  the filename.
+
+        Returns:
+            True if the character's YAML file exists, False otherwise.
+        """
+        if not self._library_dir.exists():
+            return False
+        path = self._library_dir / f"{slugify_name(name)}.yaml"
+        return path.exists()
+
+    def list_names(self) -> list[str]:
+        """List all character slugified names in the library.
+
+        Returns:
+            A list of slugified character names (the YAML filenames
+            without the .yaml extension). Returns an empty list if the
+            library directory does not exist.
+        """
+        if not self._library_dir.exists():
+            return []
+        return [p.stem for p in sorted(self._library_dir.glob("*.yaml"))]
