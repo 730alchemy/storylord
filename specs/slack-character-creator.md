@@ -51,7 +51,7 @@ Enable users to create and persist `CharacterProfile` objects through a conversa
 
 6. **AC-6**: Given a character name "Elijah Boondog", when slugified for filename, then the result is `elijah-boondog.yaml`.
 
-7. **AC-7**: Given a save request for a character whose slugified name matches an existing file, when saved, then the existing file is overwritten (no duplicate detection).
+7. **AC-7**: Given a save request for a character whose slugified name matches an existing file, when saved, then the existing file is copied to `{name}.yaml.old` as a backup, a warning is logged, and the file is overwritten with the new character data.
 
 8. **AC-8**: Given a character name with special characters (e.g., "Dr. Smith-Jones III"), when slugified, then only alphanumeric characters and hyphens remain, with no leading/trailing hyphens.
 
