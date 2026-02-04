@@ -6,6 +6,7 @@ import structlog
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 
+from config import get_model_for_agent_type
 from models import ArchitectInput, PlotEvent, StoryArchitecture
 from tools.registry import ToolRegistry
 
@@ -110,7 +111,7 @@ class DefaultArchitect:
 
     def _create_chain(self):
         """Create the LangChain chain for generating plot events."""
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        llm = ChatAnthropic(model=get_model_for_agent_type("architect"))
         structured_llm = llm.with_structured_output(PlotEvent)
 
         prompt = ChatPromptTemplate.from_messages(

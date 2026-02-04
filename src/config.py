@@ -9,7 +9,33 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     anthropic_api_key: str
 
+    # LLM Model Configuration
+    llm_default_model: str = "claude-sonnet-4-20250514"
+    llm_character_model: str | None = None
+    llm_architect_model: str | None = None
+    llm_editor_model: str | None = None
+    llm_narrator_model: str | None = None
+
     model_config = SettingsConfigDict(env_file=".env")
+
+
+def get_model_for_agent_type(agent_type: str) -> str:
+    """Get the configured model for a specific agent type.
+
+    Args:
+        agent_type: One of "character", "architect", "editor", "narrator".
+
+    Returns:
+        The model name to use for this agent type.
+    """
+    agent_model_map = {
+        "character": settings.llm_character_model,
+        "architect": settings.llm_architect_model,
+        "editor": settings.llm_editor_model,
+        "narrator": settings.llm_narrator_model,
+    }
+    per_agent_model = agent_model_map.get(agent_type)
+    return per_agent_model if per_agent_model else settings.llm_default_model
 
 
 def configure_logging():

@@ -1,6 +1,7 @@
 # Project specific
 output/
 logs/
+.obsidian/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -210,5 +211,3 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Obsidian
-.obsidian/

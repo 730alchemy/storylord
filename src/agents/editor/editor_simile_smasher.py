@@ -6,6 +6,7 @@ import structlog
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 
+from config import get_model_for_agent_type
 from models import EditedText, EditorInput
 from tools.registry import ToolRegistry
 
@@ -61,7 +62,7 @@ class SimileSmasherEditor:
 
     def _create_chain(self):
         """Create the LangChain chain for editing text."""
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        llm = ChatAnthropic(model=get_model_for_agent_type("editor"))
         structured_llm = llm.with_structured_output(EditedText)
 
         prompt = ChatPromptTemplate.from_messages(
