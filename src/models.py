@@ -207,6 +207,9 @@ class StoryInput(BaseModel):
     tone: str
     output_file: str
 
+    # Characters from the persistent library (resolved at load time)
+    character_library: list[str] = Field(default_factory=list)
+
     # Agent and tool selection (discovered via entry points)
     architect: str = "default"
     narrator: str = "default"
