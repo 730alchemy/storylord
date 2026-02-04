@@ -17,6 +17,7 @@ from agents.character.protocols import (
     SpeakInput,
     ThinkInput,
 )
+from config import get_model_for_agent_type
 from models import CharacterMemory, CharacterProfile
 from tools.registry import ToolRegistry
 
@@ -55,7 +56,7 @@ class BaseCharacterAgent:
         self.instructions = instructions
         self.memory = initial_memory or CharacterMemory()
 
-        self._llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        self._llm = ChatAnthropic(model=get_model_for_agent_type("character"))
 
     def _build_base_system_prompt(self) -> str:
         """Build the base system prompt for this character.

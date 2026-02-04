@@ -10,6 +10,7 @@ from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from agents.character.registry import CharacterRegistry
+from config import get_model_for_agent_type
 from graph.tool_loop import build_tool_loop
 from models import (
     BeatNarration,
@@ -288,14 +289,14 @@ class DefaultNarrator:
 
     def _create_generation_llm(self, tools: ToolRegistry | None):
         """Create the LLM for narrative generation with tool support."""
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        llm = ChatAnthropic(model=get_model_for_agent_type("narrator"))
         if tools and len(tools) > 0:
             return llm.bind_tools(tools.list_tools())
         return llm
 
     def _create_evaluation_chain(self):
         """Create the LangChain chain for evaluating and revising narrative."""
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514")
+        llm = ChatAnthropic(model=get_model_for_agent_type("narrator"))
         structured_llm = llm.with_structured_output(ConflictEvaluation)
 
         prompt = ChatPromptTemplate.from_messages(
