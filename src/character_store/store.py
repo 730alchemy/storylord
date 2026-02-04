@@ -48,3 +48,28 @@ class CharacterStore:
         path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
         return path
+
+    def load(self, name: str) -> CharacterProfile:
+        """Load a CharacterProfile from the library by character name.
+
+        Args:
+            name: The character's name. Slugified internally to resolve
+                  the filename.
+
+        Returns:
+            The deserialized and validated CharacterProfile.
+
+        Raises:
+            FileNotFoundError: If no file exists for the given name.
+            pydantic.ValidationError: If the file content doesn't match
+                the CharacterProfile schema.
+        """
+        path = self._library_dir / f"{slugify_name(name)}.yaml"
+
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Character '{name}' not found. Expected file: {path}"
+            )
+
+        data = yaml.safe_load(path.read_text())
+        return CharacterProfile.model_validate(data)
