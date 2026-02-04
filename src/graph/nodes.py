@@ -7,6 +7,7 @@ from typing import Literal
 
 import structlog
 
+from config import settings
 from agents.character.registry import CharacterRegistry
 from agents.discovery import (
     discover_character_agent_types,
@@ -37,6 +38,15 @@ def load_input_node(state: StoryGenerationState) -> dict:
                 reason="character_agents_present",
             )
     tool_registry = ToolRegistry(tool_names) if tool_names else None
+
+    # Resolve character_library references into the characters list
+    if story_input.character_library:
+        from character_store.store import CharacterStore
+
+        store = CharacterStore(library_dir=Path(settings.character_library_dir))
+        for name in story_input.character_library:
+            story_input.characters.append(store.load(name))
+            log.info("character_loaded_from_library", character=name)
 
     # Create character registry and populate with characters that have agent_config
     agent_types = discover_character_agent_types()
