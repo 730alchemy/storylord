@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     # Character library
     character_library_dir: str = "character_library"
 
+    # Slack app
+    slack_bot_token: str = ""
+    slack_signing_secret: str = ""
+    slack_app_token: str = ""
+
     # LLM Model Configuration
     llm_default_model: str = "claude-sonnet-4-20250514"
     llm_character_model: str | None = None
