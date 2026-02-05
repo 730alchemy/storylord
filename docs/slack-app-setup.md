@@ -55,14 +55,15 @@ Save.
 
 ### 4. Install the app
 
-The app needs two scopes:
+The app needs three scopes:
 
 - `commands` — auto-granted for slash commands.
 - `chat:write` — required to send DM replies during the character creation
   conversation.
+- `im:read` — required for Slack to deliver `message.im` events to the bot.
 
-Add `chat:write` under **OAuth & Permissions** → **Scopes** → **Bot Token Scopes**
-before installing (or reinstalling).
+Add `chat:write` and `im:read` under **OAuth & Permissions** → **Scopes** →
+**Bot Token Scopes** before installing (or reinstalling).
 
 Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`)
 from the **Install App** page — you will need it in step 6.
