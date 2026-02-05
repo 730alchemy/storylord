@@ -6,6 +6,7 @@ from slack_bolt import App
 
 from config import settings
 from slack_app.handlers.commands import handle_create_character
+from slack_app.handlers.messages import handle_message
 from slack_app.state import StateManager
 
 # Shared state manager — one instance for the lifetime of the process
@@ -26,5 +27,9 @@ def create_app() -> App:
             command=command,
             state_manager=state_manager,
         )
+
+    @app.message()
+    def on_message(message, say):
+        handle_message(message=message, say=say, state_manager=state_manager)
 
     return app

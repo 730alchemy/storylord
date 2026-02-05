@@ -27,4 +27,4 @@ def handle_create_character(
         state_manager: Shared StateManager instance.
     """
     state_manager.start_new(command["user_id"])
-    ack(text="Let's create a character. What's their name?")
+    ack(text="Let's create a character! DM me with their name to get started.")
