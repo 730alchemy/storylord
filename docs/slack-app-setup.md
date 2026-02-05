@@ -47,7 +47,7 @@ flow requires them.
 
 | Event |
 |-------|
-| `message:im` |
+| `message.im` |
 
 Save.
 
