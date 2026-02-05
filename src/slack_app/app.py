@@ -8,7 +8,7 @@ from agents.discovery import discover_character_agent_types
 from config import settings
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
-from slack_app.handlers.submissions import handle_modal_1_submit
+from slack_app.handlers.submissions import handle_modal_1_submit, handle_modal_2_submit
 from slack_app.modals import build_modal_1, build_modal_2
 from slack_app.state import StateManager
 
@@ -75,6 +75,16 @@ def create_app() -> App:
                 property_schema=agent_type_instance.property_schema,
                 channel_id=channel_id,
             ),
+        )
+
+    @app.view("modal_2_submit")
+    def on_modal_2_submit(ack, view, body, client):
+        handle_modal_2_submit(
+            ack=ack,
+            view=view,
+            body=body,
+            state_manager=state_manager,
+            client=client,
         )
 
     return app

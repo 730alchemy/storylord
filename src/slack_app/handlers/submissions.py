@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import structlog
 
+from agents.discovery import get_character_agent_type
 from slack_app.state import StateManager, WizardPhase
 
 log = structlog.get_logger(__name__)
@@ -94,3 +95,65 @@ def handle_modal_1_submit(
             channel=channel_id,
             text="Role saved! Preparing your character preview...",
         )
+
+
+def handle_modal_2_submit(
+    ack,
+    view: dict,
+    body: dict,
+    state_manager: StateManager,
+    client,
+) -> None:
+    """Handle Modal 2 (Agent Properties) submission.
+
+    Extracts numeric property values and agent_instructions, stores them
+    in state, and advances to PREVIEW. Validation is added in commit 4.
+    """
+    user_id = body["user"]["id"]
+    channel_id = view["private_metadata"]
+    state = state_manager.get(user_id)
+
+    if state is None:
+        ack()
+        return
+
+    values = view["state"]["values"]
+
+    # Get agent type schema to know which properties to expect
+    agent_type_instance = get_character_agent_type(state.agent_type)
+    property_schema = agent_type_instance.property_schema
+    properties = property_schema.get("properties", {})
+
+    # Extract numeric properties (validation in next commit)
+    agent_properties = {}
+    for prop_name in properties:
+        block_id = f"{prop_name}_block"
+        action_id = f"{prop_name}_input"
+        value_str = values[block_id][action_id]["value"]
+        agent_properties[prop_name] = float(value_str)
+
+    # Extract agent_instructions (optional)
+    instructions_value = values["agent_instructions_block"][
+        "agent_instructions_input"
+    ].get("value")
+    agent_instructions = instructions_value or ""
+
+    # Store in state and advance to PREVIEW
+    state.agent_properties = agent_properties
+    state.agent_instructions = agent_instructions
+    state.phase = WizardPhase.PREVIEW
+
+    log.info(
+        "modal_2_submitted",
+        user=user_id,
+        agent_type=state.agent_type,
+        properties=agent_properties,
+        next_phase="PREVIEW",
+    )
+
+    ack()
+    # Slice 7 will render the preview here.
+    client.chat_postMessage(
+        channel=channel_id,
+        text="Agent configured! Preparing your character preview...",
+    )
