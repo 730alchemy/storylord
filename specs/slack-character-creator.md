@@ -128,7 +128,7 @@ src/
     __init__.py              # Package init, exports create_app()
     app.py                   # Bolt app setup, event handlers, command handlers
     state.py                 # WizardState dataclass, StateManager (in-memory dict)
-    modals.py                # Modal builders: build_modal_1(), build_modal_2(), build_correction_modal()
+    modals.py                # Modal builders: build_character_setup_modal(), build_agent_properties_modal(), build_correction_modal()
     handlers/
       __init__.py
       commands.py            # /create-character handler
@@ -425,7 +425,7 @@ Plus a multiline text input for `agent_instructions`.
 - `tests/test_modal_1.py` (new)
 
 **Commits:**
-1. Implement `build_modal_1()` with static role options
+1. Implement `build_character_setup_modal()` with static role options
 2. Add dynamic agent type options from `discover_character_agent_types()`
 3. Implement Modal 1 submission handler with toggle logic
 4. Wire up modal opening after relationships collected
@@ -444,13 +444,13 @@ Plus a multiline text input for `agent_instructions`.
 **Dependencies:** Slice 5
 
 **Files:**
-- `src/slack_app/modals.py` (modify: add `build_modal_2()`)
+- `src/slack_app/modals.py` (modify: add `build_agent_properties_modal()`)
 - `src/slack_app/handlers/submissions.py` (modify: add Modal 2 handler)
 - `tests/test_modal_2.py` (new)
 
 **Commits:**
 1. Implement schema-to-blocks converter for property inputs
-2. Implement `build_modal_2()` using agent type's `property_schema`
+2. Implement `build_agent_properties_modal()` using agent type's `property_schema`
 3. Implement Modal 2 submission handler with validation
 4. Add range validation (0-100) with error messages
 5. Add tests for both MBTI and default agent type modals
