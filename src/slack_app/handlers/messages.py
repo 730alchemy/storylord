@@ -53,22 +53,18 @@ def handle_message(
     receive guidance.
     """
     if message.get("channel_type") != "im":
-        log.info("message_ignored_not_im", channel_type=message.get("channel_type"))
         return
     if message.get("subtype"):
-        log.info("message_ignored_subtype", subtype=message.get("subtype"))
         return
 
     user_id = message["user"]
     state = state_manager.get(user_id)
 
     if state is None:
-        log.info("message_no_active_session", user=user_id)
         say(text="No character creation in progress. Use `/create-character` to start.")
         return
 
     text = (message.get("text") or "").strip()
-    log.info("message_processing", user=user_id, phase=state.phase.name, text=text[:80])
 
     # No usable text (e.g. image or file with no caption) — AC-29
     if not text:
