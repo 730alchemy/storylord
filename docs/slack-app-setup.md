@@ -109,6 +109,16 @@ pdm run slack
 The app connects to Slack and `/create-character` becomes available in any
 channel in your workspace.
 
+### How the flow works
+
+1. Type `/create-character` in any channel. You'll get an ephemeral reply
+   (visible only to you) telling you to DM the bot.
+2. Open a DM with **Storylord** — use the "+" next to Direct messages in the
+   sidebar and search for it. Do not reply in the channel; ephemeral messages
+   cannot be replied to.
+3. Type the character's name in that DM. The bot will guide you through the
+   remaining fields one at a time.
+
 ## Switching to HTTP mode
 
 Remove `SLACK_APP_TOKEN` from `.env`. The app will start an HTTP server on
