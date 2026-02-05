@@ -53,7 +53,15 @@ Save.
 
 > **Note:** In Socket Mode the Request URL field can be left blank.
 
-### 4. Install the app
+### 4. Enable the App Home messages tab
+
+Without this Slack blocks users from sending DMs to the bot.
+
+**Features** → **App Home** → find the toggle
+**"Allow users to send Slash commands and messages from the messages tab"**
+and turn it **on**.
+
+### 5. Install the app
 
 The app needs three scopes:
 
@@ -66,19 +74,19 @@ Add `chat:write` and `im:read` under **OAuth & Permissions** → **Scopes** →
 **Bot Token Scopes** before installing (or reinstalling).
 
 Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`)
-from the **Install App** page — you will need it in step 6.
+from the **Install App** page — you will need it in step 7.
 
 > **Note:** If you previously installed the app without `chat:write`, add the scope
 > and reinstall. Reinstallation is required for new scopes to take effect.
 
-### 5. Enable Socket Mode and generate an app-level token
+### 6. Enable Socket Mode and generate an app-level token
 
 **Settings** → check **Use Socket Mode**.
 
 **Install App** → scroll to **App-Level Tokens** → **Generate Token**.
 Select the `connections:open` scope. Copy the generated token (`xapp-...`).
 
-### 6. Copy tokens into `.env`
+### 7. Copy tokens into `.env`
 
 Add these three values to the project `.env` file:
 
@@ -88,9 +96,9 @@ SLACK_SIGNING_SECRET=...
 SLACK_APP_TOKEN=xapp-...
 ```
 
-- `SLACK_BOT_TOKEN` — from Install App → Installed App Settings (step 4)
+- `SLACK_BOT_TOKEN` — from Install App → Installed App Settings (step 5)
 - `SLACK_SIGNING_SECRET` — from Settings → Basic Information
-- `SLACK_APP_TOKEN` — the app-level token generated in step 5
+- `SLACK_APP_TOKEN` — the app-level token generated in step 6
 
 ## Running
 
