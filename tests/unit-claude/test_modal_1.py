@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from slack_app.handlers.submissions import handle_modal_1_submit
-from slack_app.modals import ROLE_OPTIONS, build_modal_1
+from slack_app.modals import ROLE_OPTIONS, build_character_setup_modal
 from slack_app.state import StateManager, WizardPhase, WizardState
 
 
@@ -57,29 +57,39 @@ class TestBuildModal1Structure:
     """Verify the static structure of Modal 1."""
 
     def test_callback_id(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         assert modal["callback_id"] == "modal_1_submit"
 
     def test_title(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         assert modal["title"]["text"] == "Character Setup"
 
     def test_submit_label(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         assert modal["submit"]["text"] == "Next"
 
     def test_private_metadata_is_channel(self):
-        modal = build_modal_1(
+        modal = build_character_setup_modal(
             agent_types=_fake_agent_types("default"), channel_id="DXYZ"
         )
         assert modal["private_metadata"] == "DXYZ"
 
     def test_has_three_blocks(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         assert len(modal["blocks"]) == 3
 
     def test_role_block(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         block = modal["blocks"][0]
         assert block["block_id"] == "role_block"
         assert block["element"]["type"] == "static_select"
@@ -87,7 +97,9 @@ class TestBuildModal1Structure:
         assert block["element"]["options"] == ROLE_OPTIONS
 
     def test_toggle_block_is_optional(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         block = modal["blocks"][1]
         assert block["block_id"] == "agent_toggle_block"
         assert block["element"]["type"] == "checkboxes"
@@ -95,13 +107,17 @@ class TestBuildModal1Structure:
         assert block["optional"] is True
 
     def test_toggle_block_single_option(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         options = modal["blocks"][1]["element"]["options"]
         assert len(options) == 1
         assert options[0]["value"] == "enabled"
 
     def test_agent_type_block(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         block = modal["blocks"][2]
         assert block["block_id"] == "agent_type_block"
         assert block["element"]["type"] == "static_select"
@@ -117,13 +133,15 @@ class TestBuildModal1DynamicOptions:
     """AC-17: agent_type dropdown is populated from discover results."""
 
     def test_single_agent_type(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("default"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("default"), channel_id="D0"
+        )
         options = modal["blocks"][2]["element"]["options"]
         assert len(options) == 1
         assert options[0]["value"] == "default"
 
     def test_multiple_agent_types_sorted(self):
-        modal = build_modal_1(
+        modal = build_character_setup_modal(
             agent_types=_fake_agent_types("mbti", "default", "zodiac"),
             channel_id="D0",
         )
@@ -132,7 +150,9 @@ class TestBuildModal1DynamicOptions:
         assert values == ["default", "mbti", "zodiac"]
 
     def test_option_text_matches_name(self):
-        modal = build_modal_1(agent_types=_fake_agent_types("mbti"), channel_id="D0")
+        modal = build_character_setup_modal(
+            agent_types=_fake_agent_types("mbti"), channel_id="D0"
+        )
         option = modal["blocks"][2]["element"]["options"][0]
         assert option["text"]["text"] == "mbti"
         assert option["text"]["type"] == "plain_text"

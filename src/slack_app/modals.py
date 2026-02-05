@@ -55,12 +55,12 @@ ROLE_OPTIONS: list[dict[str, Any]] = [
 ]
 
 
-def build_modal_2(
+def build_agent_properties_modal(
     agent_type: str,
     property_schema: dict[str, Any],
     channel_id: str,
 ) -> dict[str, Any]:
-    """Build the Modal 2 (Agent Properties) view payload.
+    """Build the Agent Properties modal view payload.
 
     Dynamically creates number inputs for each property in the schema,
     plus a multiline text input for agent_instructions.
@@ -104,11 +104,11 @@ def build_modal_2(
     }
 
 
-def build_modal_1(
+def build_character_setup_modal(
     agent_types: dict[str, Any],
     channel_id: str,
 ) -> dict[str, Any]:
-    """Build the Modal 1 (Role & Agent Config) view payload.
+    """Build the Character Setup modal view payload.
 
     Args:
         agent_types: Map of agent-type name → CharacterAgentType instance,

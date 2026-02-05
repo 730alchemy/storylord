@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 from agents.character.character_default import DEFAULT_PROPERTY_SCHEMA
 from agents.character.character_mbti import MBTI_PROPERTY_SCHEMA
 from slack_app.handlers.submissions import handle_modal_2_submit
-from slack_app.modals import _schema_to_input_blocks, build_modal_2
+from slack_app.modals import _schema_to_input_blocks, build_agent_properties_modal
 from slack_app.state import StateManager, WizardPhase, WizardState
 
 
@@ -86,28 +86,28 @@ class TestBuildModal2MBTI:
     """AC-18: Modal 2 for MBTI shows 4 numeric inputs + instructions."""
 
     def test_callback_id(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         assert modal["callback_id"] == "modal_2_submit"
 
     def test_title(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         assert modal["title"]["text"] == "Agent Properties"
 
     def test_submit_label(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         assert modal["submit"]["text"] == "Next"
 
     def test_private_metadata_is_channel(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "DXYZ")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "DXYZ")
         assert modal["private_metadata"] == "DXYZ"
 
     def test_has_five_blocks(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         # 4 properties + agent_instructions
         assert len(modal["blocks"]) == 5
 
     def test_property_blocks_for_mbti(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         property_blocks = modal["blocks"][:4]
         block_ids = [b["block_id"] for b in property_blocks]
         assert block_ids == [
@@ -118,7 +118,7 @@ class TestBuildModal2MBTI:
         ]
 
     def test_instructions_block_is_multiline_optional(self):
-        modal = build_modal_2("mbti", MBTI_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("mbti", MBTI_PROPERTY_SCHEMA, "D0")
         instructions_block = modal["blocks"][4]
         assert instructions_block["block_id"] == "agent_instructions_block"
         assert instructions_block["element"]["multiline"] is True
@@ -134,12 +134,12 @@ class TestBuildModal2Default:
     """AC-19: Modal 2 for default shows 5 numeric inputs + instructions."""
 
     def test_has_six_blocks(self):
-        modal = build_modal_2("default", DEFAULT_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("default", DEFAULT_PROPERTY_SCHEMA, "D0")
         # 5 properties + agent_instructions
         assert len(modal["blocks"]) == 6
 
     def test_property_blocks_for_default(self):
-        modal = build_modal_2("default", DEFAULT_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("default", DEFAULT_PROPERTY_SCHEMA, "D0")
         property_blocks = modal["blocks"][:5]
         block_ids = [b["block_id"] for b in property_blocks]
         assert block_ids == [
@@ -151,7 +151,7 @@ class TestBuildModal2Default:
         ]
 
     def test_instructions_block_at_end(self):
-        modal = build_modal_2("default", DEFAULT_PROPERTY_SCHEMA, "D0")
+        modal = build_agent_properties_modal("default", DEFAULT_PROPERTY_SCHEMA, "D0")
         instructions_block = modal["blocks"][5]
         assert instructions_block["block_id"] == "agent_instructions_block"
 
