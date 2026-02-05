@@ -37,7 +37,23 @@ Select your workspace.
 | Request URL | _(leave blank if using Socket Mode)_ |
 | Short description | Create a character for Storylord |
 
-### 3. Install the app
+### 3. Subscribe to events
+
+Slash commands arrive without event subscriptions, but the DM conversation
+flow requires them.
+
+**Event Subscriptions** → toggle **on** → under **Bot Events** click
+**Add Bot Event** and add:
+
+| Event |
+|-------|
+| `message:im` |
+
+Save.
+
+> **Note:** In Socket Mode the Request URL field can be left blank.
+
+### 4. Install the app
 
 The app needs two scopes:
 
@@ -49,19 +65,19 @@ Add `chat:write` under **OAuth & Permissions** → **Scopes** → **Bot Token Sc
 before installing (or reinstalling).
 
 Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`)
-from the **Install App** page — you will need it in step 5.
+from the **Install App** page — you will need it in step 6.
 
 > **Note:** If you previously installed the app without `chat:write`, add the scope
 > and reinstall. Reinstallation is required for new scopes to take effect.
 
-### 4. Enable Socket Mode and generate an app-level token
+### 5. Enable Socket Mode and generate an app-level token
 
 **Settings** → check **Use Socket Mode**.
 
 **Install App** → scroll to **App-Level Tokens** → **Generate Token**.
 Select the `connections:open` scope. Copy the generated token (`xapp-...`).
 
-### 5. Copy tokens into `.env`
+### 6. Copy tokens into `.env`
 
 Add these three values to the project `.env` file:
 
@@ -71,9 +87,9 @@ SLACK_SIGNING_SECRET=...
 SLACK_APP_TOKEN=xapp-...
 ```
 
-- `SLACK_BOT_TOKEN` — from Install App → Installed App Settings (step 3)
+- `SLACK_BOT_TOKEN` — from Install App → Installed App Settings (step 4)
 - `SLACK_SIGNING_SECRET` — from Settings → Basic Information
-- `SLACK_APP_TOKEN` — the app-level token generated in step 4
+- `SLACK_APP_TOKEN` — the app-level token generated in step 5
 
 ## Running
 
