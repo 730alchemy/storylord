@@ -6,10 +6,14 @@ from slack_bolt import App
 
 from agents.discovery import discover_character_agent_types
 from config import settings
-from slack_app.handlers.actions import handle_save_action
+from slack_app.handlers.actions import handle_edit_action, handle_save_action
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
-from slack_app.handlers.submissions import handle_modal_1_submit, handle_modal_2_submit
+from slack_app.handlers.submissions import (
+    handle_correction_modal_submit,
+    handle_modal_1_submit,
+    handle_modal_2_submit,
+)
 from slack_app.modals import build_agent_properties_modal, build_character_setup_modal
 from slack_app.state import StateManager
 
@@ -94,6 +98,25 @@ def create_app() -> App:
     def on_save_character(ack, body, client):
         handle_save_action(
             ack=ack,
+            body=body,
+            state_manager=state_manager,
+            client=client,
+        )
+
+    @app.action("edit_character")
+    def on_edit_character(ack, body, client):
+        handle_edit_action(
+            ack=ack,
+            body=body,
+            state_manager=state_manager,
+            client=client,
+        )
+
+    @app.view("correction_modal_submit")
+    def on_correction_modal_submit(ack, view, body, client):
+        handle_correction_modal_submit(
+            ack=ack,
+            view=view,
             body=body,
             state_manager=state_manager,
             client=client,
