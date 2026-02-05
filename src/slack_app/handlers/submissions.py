@@ -124,13 +124,27 @@ def handle_modal_2_submit(
     property_schema = agent_type_instance.property_schema
     properties = property_schema.get("properties", {})
 
-    # Extract numeric properties (validation in next commit)
+    # Extract and validate numeric properties (AC-20)
     agent_properties = {}
+    errors = {}
+
     for prop_name in properties:
         block_id = f"{prop_name}_block"
         action_id = f"{prop_name}_input"
         value_str = values[block_id][action_id]["value"]
-        agent_properties[prop_name] = float(value_str)
+
+        try:
+            value = float(value_str)
+            if value < 0 or value > 100:
+                errors[block_id] = "Must be between 0 and 100"
+            else:
+                agent_properties[prop_name] = value
+        except (ValueError, TypeError):
+            errors[block_id] = "Must be a number"
+
+    if errors:
+        ack(response_action="errors", errors=errors)
+        return
 
     # Extract agent_instructions (optional)
     instructions_value = values["agent_instructions_block"][
