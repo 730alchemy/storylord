@@ -37,12 +37,18 @@ Select your workspace.
 | Request URL | _(leave blank if using Socket Mode)_ |
 | Short description | Create a character for Storylord |
 
-### 3. Grant permissions
+### 3. Install the app
 
-**OAuth & Permissions** → **Scopes** → **Bot Token Scopes** → add `chat:write`
+The `/create-character` slash command only needs the `commands` scope, which is
+auto-granted. No additional scopes are required at this stage.
 
 Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`)
 from the **Install App** page — you will need it in step 5.
+
+> **Note:** `chat:write` will be needed once the freeform conversation flow is
+> implemented (Slice 4). When that lands, add it under **OAuth & Permissions** →
+> **Scopes** → **Bot Token Scopes**, then reinstall the app. Reinstallation is
+> required for new scopes to take effect.
 
 ### 4. Enable Socket Mode and generate an app-level token
 
