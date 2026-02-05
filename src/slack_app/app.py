@@ -20,10 +20,9 @@ def create_app() -> App:
     )
 
     @app.command("/create-character")
-    def create_character(ack, say, command):
+    def create_character(ack, command):
         handle_create_character(
             ack=ack,
-            say=say,
             command=command,
             state_manager=state_manager,
         )
