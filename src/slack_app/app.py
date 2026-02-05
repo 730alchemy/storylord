@@ -9,7 +9,7 @@ from config import settings
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
 from slack_app.handlers.submissions import handle_modal_1_submit
-from slack_app.modals import build_modal_1
+from slack_app.modals import build_modal_1, build_modal_2
 from slack_app.state import StateManager
 
 # Shared state manager — one instance for the lifetime of the process
@@ -53,6 +53,28 @@ def create_app() -> App:
             body=body,
             state_manager=state_manager,
             client=client,
+        )
+
+    @app.action("open_modal_2")
+    def on_open_modal_2(ack, body, client):
+        ack()
+        user_id = body["user"]["id"]
+        channel_id = body["channel"]["id"]
+        state = state_manager.get(user_id)
+
+        if state is None:
+            return
+
+        agent_types = discover_character_agent_types()
+        agent_type_instance = agent_types[state.agent_type]
+
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view=build_modal_2(
+                agent_type=state.agent_type,
+                property_schema=agent_type_instance.property_schema,
+                channel_id=channel_id,
+            ),
         )
 
     return app

@@ -55,6 +55,55 @@ ROLE_OPTIONS: list[dict[str, Any]] = [
 ]
 
 
+def build_modal_2(
+    agent_type: str,
+    property_schema: dict[str, Any],
+    channel_id: str,
+) -> dict[str, Any]:
+    """Build the Modal 2 (Agent Properties) view payload.
+
+    Dynamically creates number inputs for each property in the schema,
+    plus a multiline text input for agent_instructions.
+
+    Args:
+        agent_type: The selected agent type name (for logging/context).
+        property_schema: The JSON Schema for this agent type's properties.
+        channel_id: DM channel to return to after submission.
+    """
+    blocks = _schema_to_input_blocks(property_schema)
+
+    # Add agent_instructions block at the end
+    blocks.append(
+        {
+            "type": "input",
+            "block_id": "agent_instructions_block",
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "agent_instructions_input",
+                "multiline": True,
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Agent Instructions",
+            },
+            "hint": {
+                "type": "plain_text",
+                "text": "Custom behavioral instructions for this character (optional)",
+            },
+            "optional": True,
+        }
+    )
+
+    return {
+        "type": "modal",
+        "callback_id": "modal_2_submit",
+        "title": {"type": "plain_text", "text": "Agent Properties"},
+        "submit": {"type": "plain_text", "text": "Next"},
+        "private_metadata": channel_id,
+        "blocks": blocks,
+    }
+
+
 def build_modal_1(
     agent_types: dict[str, Any],
     channel_id: str,

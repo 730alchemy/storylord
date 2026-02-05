@@ -55,10 +55,29 @@ def handle_modal_1_submit(
             next_phase="MODAL_2_OPEN",
         )
         ack()
-        # Slice 6 will open Modal 2 here.
+        # Post a button to open Modal 2
         client.chat_postMessage(
             channel=channel_id,
-            text="Agent type selected. Setting up properties...",
+            text="Now let's configure the agent properties.",
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Now let's configure the agent properties.",
+                    },
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {"type": "plain_text", "text": "Continue"},
+                            "action_id": "open_modal_2",
+                        }
+                    ],
+                },
+            ],
         )
     else:
         state.phase = WizardPhase.PREVIEW
