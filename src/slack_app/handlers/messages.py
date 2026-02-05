@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import Callable
 
+import structlog
+
 from slack_app.state import StateManager, WizardPhase
+
+log = structlog.get_logger(__name__)
 
 # Ordered sequence of freeform phases and the field each populates.
 _FREEFORM_STEPS: list[tuple[WizardPhase, str]] = [
@@ -49,18 +53,22 @@ def handle_message(
     receive guidance.
     """
     if message.get("channel_type") != "im":
+        log.info("message_ignored_not_im", channel_type=message.get("channel_type"))
         return
     if message.get("subtype"):
+        log.info("message_ignored_subtype", subtype=message.get("subtype"))
         return
 
     user_id = message["user"]
     state = state_manager.get(user_id)
 
     if state is None:
+        log.info("message_no_active_session", user=user_id)
         say(text="No character creation in progress. Use `/create-character` to start.")
         return
 
     text = (message.get("text") or "").strip()
+    log.info("message_processing", user=user_id, phase=state.phase.name, text=text[:80])
 
     # No usable text (e.g. image or file with no caption) — AC-29
     if not text:
@@ -86,10 +94,22 @@ def handle_message(
     if next_index < len(_FREEFORM_STEPS):
         next_phase, _ = _FREEFORM_STEPS[next_index]
         state.phase = next_phase
+        log.info(
+            "message_field_captured",
+            user=user_id,
+            field=field_name,
+            next_phase=next_phase.name,
+        )
         say(text=_NEXT_PROMPT[next_phase].format(name=state.name))
     else:
         # Past the last freeform phase — hand off to Modal 1 (Slice 5)
         state.phase = WizardPhase.MODAL_1_OPEN
+        log.info(
+            "message_field_captured",
+            user=user_id,
+            field=field_name,
+            next_phase="MODAL_1_OPEN",
+        )
         say(
             text="Great! Now let's set their role and personality. Opening a quick form..."
         )
