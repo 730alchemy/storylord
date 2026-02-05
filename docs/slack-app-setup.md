@@ -20,11 +20,11 @@ HTTP mode on port 3000.
 
 ## Prerequisites
 
-A Slack workspace and a Slack app configured at https://api.slack.com/apps.
+A Slack workspace and a Slack app configured at <https://api.slack.com/apps>.
 
 ### 1. Create the Slack app
 
-Go to https://api.slack.com/apps → **Create an app** → **From scratch**.
+Go to <https://api.slack.com/apps> → **Create an app** → **From scratch**.
 Select your workspace.
 
 ### 2. Configure the slash command
@@ -39,16 +39,20 @@ Select your workspace.
 
 ### 3. Install the app
 
-The `/create-character` slash command only needs the `commands` scope, which is
-auto-granted. No additional scopes are required at this stage.
+The app needs two scopes:
+
+- `commands` — auto-granted for slash commands.
+- `chat:write` — required to send DM replies during the character creation
+  conversation.
+
+Add `chat:write` under **OAuth & Permissions** → **Scopes** → **Bot Token Scopes**
+before installing (or reinstalling).
 
 Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`)
 from the **Install App** page — you will need it in step 5.
 
-> **Note:** `chat:write` will be needed once the freeform conversation flow is
-> implemented (Slice 4). When that lands, add it under **OAuth & Permissions** →
-> **Scopes** → **Bot Token Scopes**, then reinstall the app. Reinstallation is
-> required for new scopes to take effect.
+> **Note:** If you previously installed the app without `chat:write`, add the scope
+> and reinstall. Reinstallation is required for new scopes to take effect.
 
 ### 4. Enable Socket Mode and generate an app-level token
 
