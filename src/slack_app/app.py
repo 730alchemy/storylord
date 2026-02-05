@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from slack_bolt import App
 
+from agents.discovery import discover_character_agent_types
 from config import settings
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
+from slack_app.handlers.submissions import handle_modal_1_submit
+from slack_app.modals import build_modal_1
 from slack_app.state import StateManager
 
 # Shared state manager — one instance for the lifetime of the process
@@ -31,5 +34,25 @@ def create_app() -> App:
     @app.message()
     def on_message(message, say):
         handle_message(message=message, say=say, state_manager=state_manager)
+
+    @app.action("open_modal_1")
+    def on_open_modal_1(ack, body, client):
+        ack()
+        channel_id = body["channel"]["id"]
+        agent_types = discover_character_agent_types()
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view=build_modal_1(agent_types=agent_types, channel_id=channel_id),
+        )
+
+    @app.view("modal_1_submit")
+    def on_modal_1_submit(ack, view, body, client):
+        handle_modal_1_submit(
+            ack=ack,
+            view=view,
+            body=body,
+            state_manager=state_manager,
+            client=client,
+        )
 
     return app

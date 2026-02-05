@@ -107,7 +107,26 @@ def handle_message(
             next_phase="MODAL_1_OPEN",
         )
         say(
-            text="Great! Now let's set their role and personality. Opening a quick form..."
+            text="Now let's set their role and personality.",
+            blocks=[
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Now let's set their role and personality.",
+                    },
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {"type": "plain_text", "text": "Continue"},
+                            "action_id": "open_modal_1",
+                        }
+                    ],
+                },
+            ],
         )
 
 
