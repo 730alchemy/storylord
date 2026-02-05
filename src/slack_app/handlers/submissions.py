@@ -172,3 +172,107 @@ def handle_modal_2_submit(
         channel=channel_id,
         **build_preview_message(state),
     )
+
+
+def handle_correction_modal_submit(
+    ack,
+    view: dict,
+    body: dict,
+    state_manager: StateManager,
+    client,
+) -> None:
+    """Handle Correction modal submission.
+
+    Extracts all field values, updates the wizard state, validates agent
+    properties if enabled, and re-renders the preview with updated values.
+    State remains PREVIEW (AC-25).
+
+    Args:
+        ack: Slack ack function.
+        view: The view payload from Slack.
+        body: The submission body.
+        state_manager: The wizard state manager.
+        client: Slack client for posting messages.
+    """
+    user_id = body["user"]["id"]
+    channel_id = view["private_metadata"]
+    state = state_manager.get(user_id)
+
+    if state is None:
+        ack()
+        return
+
+    values = view["state"]["values"]
+
+    # Extract freeform text fields
+    state.name = values["name_block"]["name_input"]["value"]
+    state.description = values["description_block"]["description_input"]["value"]
+    state.motivations = values["motivations_block"]["motivations_input"]["value"]
+    state.backstory = values["backstory_block"]["backstory_input"]["value"]
+    state.relationships = values["relationships_block"]["relationships_input"]["value"]
+
+    # Extract role
+    state.role = values["role_block"]["role_select"]["selected_option"]["value"]
+
+    # Extract agent config toggle
+    toggle_options = values["agent_toggle_block"]["agent_toggle"]["selected_options"]
+    state.agent_config_enabled = any(
+        opt["value"] == "enabled" for opt in toggle_options
+    )
+
+    # Extract agent type
+    state.agent_type = values["agent_type_block"]["agent_type_select"][
+        "selected_option"
+    ]["value"]
+
+    # If agent config is enabled, extract and validate properties
+    if state.agent_config_enabled:
+        agent_type_instance = get_character_agent_type(state.agent_type)
+        property_schema = agent_type_instance.property_schema
+        properties = property_schema.get("properties", {})
+
+        agent_properties = {}
+        errors = {}
+
+        for prop_name in properties:
+            block_id = f"{prop_name}_block"
+            action_id = f"{prop_name}_input"
+            value_str = values[block_id][action_id]["value"]
+
+            try:
+                value = float(value_str)
+                if value < 0 or value > 100:
+                    errors[block_id] = "Must be between 0 and 100"
+                else:
+                    agent_properties[prop_name] = value
+            except (ValueError, TypeError):
+                errors[block_id] = "Must be a number"
+
+        if errors:
+            ack(response_action="errors", errors=errors)
+            return
+
+        # Extract agent_instructions
+        instructions_value = values["agent_instructions_block"][
+            "agent_instructions_input"
+        ].get("value")
+        state.agent_instructions = instructions_value or ""
+        state.agent_properties = agent_properties
+    else:
+        # Clear agent config if disabled
+        state.agent_properties = {}
+        state.agent_instructions = ""
+
+    # State remains PREVIEW (AC-25)
+    log.info(
+        "correction_modal_submitted",
+        user=user_id,
+        changes_applied=True,
+    )
+
+    ack()
+    # Re-render the preview with updated values
+    client.chat_postMessage(
+        channel=channel_id,
+        **build_preview_message(state),
+    )
