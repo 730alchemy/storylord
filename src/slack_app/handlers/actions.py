@@ -63,3 +63,7 @@ def handle_save_action(
         channel=channel_id,
         **build_confirmation_message(saved_path),
     )
+
+    # Clear wizard state (AC-27)
+    state_manager.clear(user_id)
+    log.info("wizard_session_cleared", user=user_id)

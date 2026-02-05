@@ -6,6 +6,7 @@ import structlog
 
 from agents.discovery import get_character_agent_type
 from slack_app.state import StateManager, WizardPhase
+from slack_app.views import build_preview_message
 
 log = structlog.get_logger(__name__)
 
@@ -90,10 +91,10 @@ def handle_modal_1_submit(
             next_phase="PREVIEW",
         )
         ack()
-        # Slice 7 will render the preview here.
+        # Render the character preview with Save/Edit buttons
         client.chat_postMessage(
             channel=channel_id,
-            text="Role saved! Preparing your character preview...",
+            **build_preview_message(state),
         )
 
 
@@ -166,8 +167,8 @@ def handle_modal_2_submit(
     )
 
     ack()
-    # Slice 7 will render the preview here.
+    # Render the character preview with Save/Edit buttons
     client.chat_postMessage(
         channel=channel_id,
-        text="Agent configured! Preparing your character preview...",
+        **build_preview_message(state),
     )

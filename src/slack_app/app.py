@@ -6,6 +6,7 @@ from slack_bolt import App
 
 from agents.discovery import discover_character_agent_types
 from config import settings
+from slack_app.handlers.actions import handle_save_action
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
 from slack_app.handlers.submissions import handle_modal_1_submit, handle_modal_2_submit
@@ -84,6 +85,15 @@ def create_app() -> App:
         handle_modal_2_submit(
             ack=ack,
             view=view,
+            body=body,
+            state_manager=state_manager,
+            client=client,
+        )
+
+    @app.action("save_character")
+    def on_save_character(ack, body, client):
+        handle_save_action(
+            ack=ack,
             body=body,
             state_manager=state_manager,
             client=client,
