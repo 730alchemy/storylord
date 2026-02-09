@@ -1,8 +1,10 @@
 """Unit tests for CharacterMemory class in models.py."""
 
+import uuid
+
 import pytest
 
-from models import CharacterMemory
+from models import CharacterMemory, CharacterProfile
 
 
 class TestCharacterMemoryAddInteraction:
@@ -405,3 +407,95 @@ class TestCharacterMemoryIsolation:
         assert len(memory_b.events) == 0
         assert len(memory_b.knowledge) == 0
         assert memory_b.relationships == {}
+
+
+class TestCharacterProfileUUID:
+    """Tests for CharacterProfile UUID field."""
+
+    def test_character_profile_auto_generates_uuid_when_not_provided(self):
+        """Given a CharacterProfile is instantiated without a uuid field, when the object is created, then a uuid field is present with a valid UUID v4 string value."""
+        profile = CharacterProfile(
+            name="Test Character",
+            description="A test character",
+            role="protagonist",
+            motivations="Test motivations",
+            relationships="Test relationships",
+            backstory="Test backstory",
+        )
+
+        assert hasattr(profile, "uuid")
+        assert profile.uuid is not None
+        assert isinstance(profile.uuid, str)
+        # Verify it's a valid UUID by parsing it
+        parsed_uuid = uuid.UUID(profile.uuid)
+        assert parsed_uuid.version == 4
+
+    def test_character_profile_preserves_explicit_uuid(self):
+        """Given a CharacterProfile is instantiated with an explicit uuid value, when the object is created, then the provided uuid is used and not overwritten."""
+        explicit_uuid = str(uuid.uuid4())
+        profile = CharacterProfile(
+            name="Test Character",
+            description="A test character",
+            role="protagonist",
+            motivations="Test motivations",
+            relationships="Test relationships",
+            backstory="Test backstory",
+            uuid=explicit_uuid,
+        )
+
+        assert profile.uuid == explicit_uuid
+
+    def test_character_profile_uuid_is_string(self):
+        """Given a CharacterProfile is instantiated, when the model is serialized to JSON, then the uuid field is a string type."""
+        profile = CharacterProfile(
+            name="Test Character",
+            description="A test character",
+            role="protagonist",
+            motivations="Test motivations",
+            relationships="Test relationships",
+            backstory="Test backstory",
+        )
+
+        json_data = profile.model_dump(mode="json")
+        assert "uuid" in json_data
+        assert isinstance(json_data["uuid"], str)
+
+    def test_character_profile_generates_unique_uuids(self):
+        """Given two CharacterProfile instances are created without explicit uuids, when both are instantiated, then they have different uuid values."""
+        profile1 = CharacterProfile(
+            name="Character 1",
+            description="First character",
+            role="protagonist",
+            motivations="Motivations 1",
+            relationships="Relationships 1",
+            backstory="Backstory 1",
+        )
+        profile2 = CharacterProfile(
+            name="Character 2",
+            description="Second character",
+            role="antagonist",
+            motivations="Motivations 2",
+            relationships="Relationships 2",
+            backstory="Backstory 2",
+        )
+
+        assert profile1.uuid != profile2.uuid
+
+    def test_character_profile_uuid_is_valid_uuid4_format(self):
+        """Given a CharacterProfile with auto-generated uuid, when the uuid value is checked, then it is a valid UUID4 format string."""
+        profile = CharacterProfile(
+            name="Test Character",
+            description="A test character",
+            role="protagonist",
+            motivations="Test motivations",
+            relationships="Test relationships",
+            backstory="Test backstory",
+        )
+
+        # Parse the UUID to ensure it's valid
+        parsed_uuid = uuid.UUID(profile.uuid)
+        # Verify it's specifically UUID version 4
+        assert parsed_uuid.version == 4
+        # Verify the string format matches UUID standard (with hyphens)
+        assert len(profile.uuid) == 36
+        assert profile.uuid.count("-") == 4
