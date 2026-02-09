@@ -153,3 +153,24 @@ class CharacterStore:
             self._uuid_index[profile.uuid] = slug
 
         return characters
+
+    def get_by_uuid(self, character_uuid: str) -> CharacterProfile:
+        """Load a CharacterProfile by UUID.
+
+        Args:
+            character_uuid: The UUID of the character to load.
+
+        Returns:
+            The deserialized and validated CharacterProfile.
+
+        Raises:
+            KeyError: If no character with the given UUID exists in the index.
+        """
+        if character_uuid not in self._uuid_index:
+            raise KeyError(f"Character with UUID '{character_uuid}' not found in index")
+
+        slug = self._uuid_index[character_uuid]
+        # Load by the slug name (which will also handle UUID migration if needed)
+        path = self._library_dir / f"{slug}.yaml"
+        data = yaml.safe_load(path.read_text())
+        return CharacterProfile.model_validate(data)
