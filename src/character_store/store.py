@@ -174,3 +174,29 @@ class CharacterStore:
         path = self._library_dir / f"{slug}.yaml"
         data = yaml.safe_load(path.read_text())
         return CharacterProfile.model_validate(data)
+
+    def delete(self, character_uuid: str) -> None:
+        """Delete a character by UUID.
+
+        Removes the character's YAML file from disk and removes the UUID
+        from the in-memory index.
+
+        Args:
+            character_uuid: The UUID of the character to delete.
+
+        Raises:
+            KeyError: If no character with the given UUID exists in the index.
+        """
+        if character_uuid not in self._uuid_index:
+            raise KeyError(f"Character with UUID '{character_uuid}' not found in index")
+
+        slug = self._uuid_index[character_uuid]
+        path = self._library_dir / f"{slug}.yaml"
+
+        # Remove the file
+        if path.exists():
+            path.unlink()
+            log.info("character_deleted", uuid=character_uuid, slug=slug)
+
+        # Remove from index
+        del self._uuid_index[character_uuid]
