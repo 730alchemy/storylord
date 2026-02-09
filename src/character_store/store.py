@@ -53,6 +53,9 @@ class CharacterStore:
     def load(self, name: str) -> CharacterProfile:
         """Load a CharacterProfile from the library by character name.
 
+        If the file lacks a UUID, one is auto-generated and the file is
+        immediately rewritten with the UUID persisted.
+
         Args:
             name: The character's name. Slugified internally to resolve
                   the filename.
@@ -73,7 +76,28 @@ class CharacterStore:
             )
 
         data = yaml.safe_load(path.read_text())
-        return CharacterProfile.model_validate(data)
+        profile = CharacterProfile.model_validate(data)
+
+        # UUID migration: if file didn't have UUID, persist it now
+        if "uuid" not in data:
+            log.info(
+                "uuid_migration",
+                character=name,
+                uuid=profile.uuid,
+                message="Auto-assigned UUID to legacy character file",
+            )
+            # Rewrite the file with UUID
+            updated_data = profile.model_dump(mode="json", exclude_none=True)
+            path.write_text(
+                yaml.dump(updated_data, default_flow_style=False, sort_keys=False)
+            )
+
+        # Update UUID index if it exists
+        if self._uuid_index is not None:
+            slug = path.stem
+            self._uuid_index[profile.uuid] = slug
+
+        return profile
 
     def exists(self, name: str) -> bool:
         """Check whether a character exists in the library.
