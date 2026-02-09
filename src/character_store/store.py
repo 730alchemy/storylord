@@ -18,6 +18,7 @@ class CharacterStore:
 
     def __init__(self, library_dir: Path):
         self._library_dir = library_dir
+        self._uuid_index: dict[str, str] = {}  # Maps UUID to slug
 
     def save(self, profile: CharacterProfile) -> Path:
         """Save a CharacterProfile to the library as a YAML file.
@@ -100,3 +101,31 @@ class CharacterStore:
         if not self._library_dir.exists():
             return []
         return [p.stem for p in sorted(self._library_dir.glob("*.yaml"))]
+
+    def load_all(self) -> list[CharacterProfile]:
+        """Load all characters from the library and build UUID index.
+
+        Scans all YAML files in the library directory, loads each as a
+        CharacterProfile, and builds an in-memory index mapping UUIDs
+        to slugs for fast UUID-based lookups.
+
+        Returns:
+            A list of all CharacterProfile objects in the library.
+            Returns an empty list if the library directory does not exist.
+        """
+        if not self._library_dir.exists():
+            return []
+
+        characters = []
+        self._uuid_index.clear()
+
+        for yaml_path in sorted(self._library_dir.glob("*.yaml")):
+            data = yaml.safe_load(yaml_path.read_text())
+            profile = CharacterProfile.model_validate(data)
+            characters.append(profile)
+
+            # Build UUID-to-slug index
+            slug = yaml_path.stem
+            self._uuid_index[profile.uuid] = slug
+
+        return characters
