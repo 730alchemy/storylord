@@ -23,8 +23,9 @@ class CharacterStore:
     def save(self, profile: CharacterProfile) -> Path:
         """Save a CharacterProfile to the library as a YAML file.
 
-        If a file already exists for this character, a backup is created
-        with a .old extension before overwriting.
+        If the character's name has changed (resulting in a different slug),
+        the old file is removed. If a file already exists at the new path,
+        a backup is created with a .old extension before overwriting.
 
         Args:
             profile: The character profile to persist.
@@ -34,21 +35,42 @@ class CharacterStore:
         """
         self._library_dir.mkdir(parents=True, exist_ok=True)
 
-        path = self._library_dir / f"{slugify_name(profile.name)}.yaml"
+        new_slug = slugify_name(profile.name)
+        new_path = self._library_dir / f"{new_slug}.yaml"
 
-        if path.exists():
-            backup = path.with_suffix(".yaml.old")
-            backup.write_text(path.read_text())
+        # Check if this is a rename (character with same UUID, different slug)
+        if profile.uuid in self._uuid_index:
+            old_slug = self._uuid_index[profile.uuid]
+            if old_slug != new_slug:
+                # Name changed - remove old file
+                old_path = self._library_dir / f"{old_slug}.yaml"
+                if old_path.exists():
+                    old_path.unlink()
+                    log.info(
+                        "character_renamed",
+                        uuid=profile.uuid,
+                        old_slug=old_slug,
+                        new_slug=new_slug,
+                    )
+
+        # Handle overwrite of existing file at new path
+        if new_path.exists():
+            backup = new_path.with_suffix(".yaml.old")
+            backup.write_text(new_path.read_text())
             log.warning(
                 "character_file_overwritten",
                 character=profile.name,
                 backup=str(backup),
             )
 
+        # Write the file
         data = profile.model_dump(mode="json", exclude_none=True)
-        path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
+        new_path.write_text(yaml.dump(data, default_flow_style=False, sort_keys=False))
 
-        return path
+        # Update the UUID index
+        self._uuid_index[profile.uuid] = new_slug
+
+        return new_path
 
     def load(self, name: str) -> CharacterProfile:
         """Load a CharacterProfile from the library by character name.
