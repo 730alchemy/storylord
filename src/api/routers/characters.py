@@ -1,8 +1,9 @@
 """Character resource endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.dependencies import get_character_store
+from api.schemas import CharacterCreate
 from character_store.store import CharacterStore
 from models import CharacterProfile
 
@@ -44,3 +45,47 @@ def get_character(
             status_code=404,
             detail=f"Character with UUID '{character_id}' not found",
         )
+
+
+@router.post("/", response_model=CharacterProfile, status_code=status.HTTP_201_CREATED)
+async def create_character(
+    request: Request,
+    character_data: CharacterCreate,
+    store: CharacterStore = Depends(get_character_store),
+) -> CharacterProfile:
+    """Create a new character.
+
+    Args:
+        request: The FastAPI request object.
+        character_data: The character data (validated against CharacterCreate schema).
+        store: The character store.
+
+    Returns:
+        The created CharacterProfile with auto-generated UUID.
+
+    Raises:
+        HTTPException: 422 if uuid is provided in request body.
+    """
+    # Check raw body for uuid field
+    body = await request.json()
+    if "uuid" in body:
+        raise HTTPException(
+            status_code=422,
+            detail="uuid must not be provided on creation",
+        )
+
+    # Create CharacterProfile (auto-generates UUID)
+    profile = CharacterProfile(
+        name=character_data.name,
+        description=character_data.description,
+        role=character_data.role,
+        motivations=character_data.motivations,
+        relationships=character_data.relationships,
+        backstory=character_data.backstory,
+        agent_config=character_data.agent_config,
+    )
+
+    # Save to store
+    store.save(profile)
+
+    return profile
