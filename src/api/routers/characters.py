@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.dependencies import get_character_store
-from api.schemas import CharacterCreate
+from api.schemas import CharacterCreate, CharacterUpdate
 from character_store.store import CharacterStore
 from models import CharacterProfile
 
@@ -89,3 +89,49 @@ async def create_character(
     store.save(profile)
 
     return profile
+
+
+@router.put("/{character_id}", response_model=CharacterProfile)
+def update_character(
+    character_id: str,
+    character_data: CharacterUpdate,
+    store: CharacterStore = Depends(get_character_store),
+) -> CharacterProfile:
+    """Update a character by UUID with full replacement.
+
+    Args:
+        character_id: The UUID of the character to update.
+        character_data: The new character data (uuid in body is ignored).
+        store: The character store.
+
+    Returns:
+        The updated CharacterProfile.
+
+    Raises:
+        HTTPException: 404 if character not found.
+    """
+    # Get existing character (raises KeyError if not found)
+    try:
+        existing = store.get_by_uuid(character_id)
+    except KeyError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Character with UUID '{character_id}' not found",
+        )
+
+    # Create updated profile with path parameter UUID (ignore any uuid in body)
+    updated_profile = CharacterProfile(
+        uuid=existing.uuid,  # Preserve UUID from path
+        name=character_data.name,
+        description=character_data.description,
+        role=character_data.role,
+        motivations=character_data.motivations,
+        relationships=character_data.relationships,
+        backstory=character_data.backstory,
+        agent_config=character_data.agent_config,
+    )
+
+    # Save (handles name changes automatically)
+    store.save(updated_profile)
+
+    return updated_profile
