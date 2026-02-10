@@ -1,19 +1,31 @@
-# story-lord
+# storylord-api-server
 
-## Characters
+## Running the API Server
 
-3 sources
+### Development
 
-- built into the framework
-- create by a user
-- provided by a 3rd party
+```bash
+pdm run api
+```
 
-Each character is a separate agent that generates their own dialogue. All character agents must implement a core set of functions: speak,
-think, choose, answer. The idea behind "answer" is that another agent, such as the narrator or architect, can ask the character questions
-as part of that agent's work. We must distinguish between character agent types and character agent instances. For example, we might have
-2 agent types, each using a different personality model: CharacterAgentMBTI and CharacterAgentBigFive. There can be multiple instances of
-these agent types. Sally and Taj might be of type CharacterAgentMBTI while Roger and Lizzy are of the other type. However, all agent types
-will always implement the core set of functions. Each character agent type will have it's own set of properties. For example,
-"extroversion" might be a property of CharacterAgentMBTI but not of the other character types. Each instance of an agent type will have
-their own unique values for all properties and they will have their own instructions. Characters must maintain memory and state across
-scenes.
+Starts the server with hot reload on `http://127.0.0.1:8000`.
+
+### Production
+
+**Single process:**
+```bash
+uvicorn api.app:app --host 0.0.0.0 --port 8000
+```
+
+**Multiple workers (recommended):**
+```bash
+gunicorn -k uvicorn.workers.UvicornWorker api.app:app --workers 4 --bind 0.0.0.0:8000
+```
+
+Requires `gunicorn` to be installed (`pdm add gunicorn`).
+
+## Contributing
+
+This project uses trunk-based development: work on short-lived branches off `main`. All changes require a pull request with at least one approval before merging. Linear history is enforced — your branch must be rebased on top of `main` before merging (no merge commits); CI will fail if the branch is not a fast-forward of `main`. Run `pdm run test` and `pdm run lint` locally before pushing.
+
+See [docs/developer-workflow.md](docs/developer-workflow.md) for the full workflow.
