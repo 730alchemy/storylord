@@ -135,3 +135,26 @@ def update_character(
     store.save(updated_profile)
 
     return updated_profile
+
+
+@router.delete("/{character_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_character(
+    character_id: str,
+    store: CharacterStore = Depends(get_character_store),
+) -> None:
+    """Delete a character by UUID.
+
+    Args:
+        character_id: The UUID of the character to delete.
+        store: The character store.
+
+    Raises:
+        HTTPException: 404 if character not found.
+    """
+    try:
+        store.delete(character_id)
+    except KeyError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Character with UUID '{character_id}' not found",
+        )
