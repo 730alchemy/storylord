@@ -29,6 +29,7 @@ character_speak = "tools.character_speak:CharacterSpeakTool"
 
 [project.scripts]
 storylord-slack = "slack_app:main"
+storylord-api = "api:main"
 
 [tool.pdm]
 distribution = true
@@ -60,6 +61,7 @@ lint = { composite = [
 ] }
 start = "python src/story_lord.py"
 slack = "storylord-slack"
+api = "uvicorn api.app:app --reload"
 test = "pytest tests/ -v"
 
 [dependency-groups]

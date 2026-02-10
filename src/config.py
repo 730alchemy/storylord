@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     slack_signing_secret: str = ""
     slack_app_token: str = ""
 
+    # API server
+    api_host: str = "127.0.0.1"
+    api_port: int = 8000
+
     # LLM Model Configuration
     llm_default_model: str = "claude-sonnet-4-20250514"
     llm_character_model: str | None = None
