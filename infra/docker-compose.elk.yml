@@ -19,47 +19,6 @@ services:
     depends_on:
       - elasticsearch
 
-  storylord-api:
-    build:
-      context: ..
-      dockerfile: infra/Dockerfile
-    volumes:
-      - ../src:/app/src
-      - ../character_library:/app/character_library
-      - .:/app/infra:ro
-    env_file:
-      - ../.env
-    environment:
-      - LOG_FORMAT=json
-    ports:
-      - "8000:8000"
-    command: >
-      uvicorn api.app:app
-      --host 0.0.0.0
-      --port 8000
-      --reload
-      --reload-dir /app/src
-      --log-config /app/infra/uvicorn_log_config.json
-    depends_on:
-      - elasticsearch
-
-  filebeat:
-    image: elastic/filebeat:8.17.0
-    command: -e --strict.perms=false
-    user: root
-    environment:
-      - ELASTICSEARCH_HOST=elasticsearch
-      - ELASTICSEARCH_PORT=9200
-      - KIBANA_HOST=kibana
-      - KIBANA_PORT=5601
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    depends_on:
-      - elasticsearch
-      - storylord-api
-
 volumes:
   esdata:
     name: storylord_elasticsearch_data

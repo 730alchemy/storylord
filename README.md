@@ -26,15 +26,19 @@ Requires `gunicorn` to be installed (`pdm add gunicorn`).
 
 ## ELK Stack (Elasticsearch, Logstash, Kibana)
 
-The full ELK stack runs the API in a container alongside Elasticsearch, Kibana, and Filebeat, with structured JSON logs routed via Docker's log driver.
+The ELK stack and the API run as separate compose projects. Filebeat runs as a sidecar alongside the API and ships logs to Elasticsearch over the host network.
 
 ### Start
 
 ```bash
-docker compose -f infra/docker-compose.elk.yml up --build
+# 1. Start ELK (Elasticsearch + Kibana)
+docker compose -f infra/docker-compose.elk.yml up -d
+
+# 2. Start the API + Filebeat sidecar
+docker compose -f infra/docker-compose.api.yml up --build
 ```
 
-Omit `--build` on subsequent runs unless `infra/Dockerfile` or `pyproject.toml` has changed.
+Omit `--build` on subsequent API starts unless `infra/Dockerfile` or `pyproject.toml` has changed.
 
 Services:
 | Service | URL |
@@ -42,6 +46,15 @@ Services:
 | API | http://localhost:8000 |
 | Kibana | http://localhost:5601 |
 | Elasticsearch | http://localhost:9200 |
+
+### Pointing Filebeat at a remote Elasticsearch
+
+By default Filebeat ships to `host.docker.internal:9200` (i.e. the local ELK compose stack). To use a managed ES cluster instead, set the environment variables before starting the API compose:
+
+```bash
+ELASTICSEARCH_HOST=my-cluster.es.io ELASTICSEARCH_PORT=443 \
+  docker compose -f infra/docker-compose.api.yml up --build
+```
 
 ### First-time Kibana setup
 
@@ -53,16 +66,17 @@ Services:
 
 - The API runs with `LOG_FORMAT=json`, emitting structured JSON to stdout
 - Docker captures stdout via its default log driver
-- Filebeat reads `/var/lib/docker/containers/*/*.log`, filters to containers whose name contains `storylord`, and ships to Elasticsearch
+- Filebeat (sidecar in the API compose) reads `/var/lib/docker/containers/*/*.log` via the host Docker socket, filters to containers whose name contains `storylord`, and ships to Elasticsearch
 - Uvicorn logger config (`infra/uvicorn_log_config.json`) propagates uvicorn logs through the root structlog handler so they share the same JSON format
 
 ### Stop
 
 ```bash
+docker compose -f infra/docker-compose.api.yml down
 docker compose -f infra/docker-compose.elk.yml down
 ```
 
-Add `-v` to also wipe the Elasticsearch data volume (indices, Kibana data views, etc.).
+Add `-v` to the ELK down command to also wipe the Elasticsearch data volume (indices, Kibana data views, etc.).
 
 ## Contributing
 

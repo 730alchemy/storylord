@@ -1,5 +1,44 @@
 {
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "make bootstrap"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git mv:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(pdm list:*)",
+      "Bash(pdm run fmt:*)",
+      "Bash(pdm run lint)",
+      "Bash(pdm run ruff:*)",
+      "Bash(pdm run pyright:*)",
+      "Bash(pdm run pytest:*)",
+      "Bash(pdm run test:*)",
+      "Bash(pdm start --help:*)",
+      "Bash(pdm test:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(tree:*)",
+      "mcp__docs-langchain__SearchDocsByLangChain",
+      "WebFetch(domain:textual.textualize.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.blog.pythonlibrary.org)",
+      "WebFetch(domain:www.structlog.org)",
+      "WebSearch"
+    ]
   }
 }

@@ -1,0 +1,38 @@
+services:
+  storylord-api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    volumes:
+      - ../src:/app/src
+      - ../character_library:/app/character_library
+      - .:/app/infra:ro
+    env_file:
+      - ../.env
+    environment:
+      - LOG_FORMAT=json
+    ports:
+      - "8000:8000"
+    command: >
+      uvicorn api.app:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/src
+      --log-config /app/infra/uvicorn_log_config.json
+
+  filebeat:
+    image: elastic/filebeat:8.17.0
+    command: -e --strict.perms=false
+    user: root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-host.docker.internal}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT:-9200}
+      - KIBANA_HOST=${KIBANA_HOST:-host.docker.internal}
+      - KIBANA_PORT=${KIBANA_PORT:-5601}
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
