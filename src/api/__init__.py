@@ -3,7 +3,7 @@
 import uvicorn
 
 from api.app import create_app
-from config import settings
+from config import get_settings
 
 __all__ = ["create_app", "main"]
 
@@ -11,6 +11,7 @@ __all__ = ["create_app", "main"]
 def main() -> None:
     """Entry point for running the API server."""
     app = create_app()
+    settings = get_settings()
     uvicorn.run(
         app,
         host=settings.api_host,

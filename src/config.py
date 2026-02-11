@@ -1,12 +1,13 @@
 import logging.config
 import os
+from functools import lru_cache
 
 import structlog
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    anthropic_api_key: str
+    anthropic_api_key: str | None = None
 
     # Character library
     character_library_dir: str = "character_library"
@@ -42,6 +43,7 @@ def get_model_for_agent_type(agent_type: str) -> str:
     Returns:
         The model name to use for this agent type.
     """
+    settings = get_settings()
     agent_model_map = {
         "character": settings.llm_character_model,
         "architect": settings.llm_architect_model,
@@ -62,17 +64,6 @@ def configure_logging(log_format: str = "console"):
         structlog.processors.TimeStamper(fmt="iso"),
     ]
 
-    # Console renderer with reordered columns: timestamp, level, logger, event, context vars
-    default_renderer = structlog.dev.ConsoleRenderer()
-    default_columns = {c.key: c for c in default_renderer._columns}
-    console_columns = [
-        default_columns["timestamp"],
-        default_columns["level"],
-        default_columns["logger"],
-        default_columns["event"],
-        structlog.dev.Column("", default_renderer._default_column_formatter),
-    ]
-
     formatter = "json" if log_format == "json" else "console"
 
     logging.config.dictConfig(
@@ -84,7 +75,7 @@ def configure_logging(log_format: str = "console"):
                     "()": structlog.stdlib.ProcessorFormatter,
                     "processors": [
                         structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                        structlog.dev.ConsoleRenderer(columns=console_columns),
+                        structlog.dev.ConsoleRenderer(),
                     ],
                     "foreign_pre_chain": shared_processors,
                 },
@@ -129,16 +120,13 @@ def configure_logging(log_format: str = "console"):
     )
 
 
-def initialize_environment():
+@lru_cache
+def get_settings() -> Settings:
+    """Return a cached Settings instance."""
+    return Settings()
+
+
+def bootstrap_environment(settings: Settings) -> None:
     """Initialize environment variables from settings."""
-    settings = Settings()
-
-    if "ANTHROPIC_API_KEY" not in os.environ:
+    if settings.anthropic_api_key and "ANTHROPIC_API_KEY" not in os.environ:
         os.environ["ANTHROPIC_API_KEY"] = settings.anthropic_api_key
-
-    return settings
-
-
-# Auto-initialize when module is imported
-settings = initialize_environment()
-configure_logging(settings.log_format)

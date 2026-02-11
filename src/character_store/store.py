@@ -60,6 +60,8 @@ class CharacterStore:
             log.warning(
                 "character_file_overwritten",
                 character=profile.name,
+                profile=profile.model_dump(mode="json", exclude_none=True),
+                profile2=profile,
                 backup=str(backup),
             )
 

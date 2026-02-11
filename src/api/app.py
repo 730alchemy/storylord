@@ -6,6 +6,7 @@ import structlog
 from fastapi import FastAPI
 
 from api.routers import characters
+from bootstrap import bootstrap
 
 log = structlog.get_logger(__name__)
 
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     Returns:
         Configured FastAPI application instance.
     """
+    bootstrap()
     app = FastAPI(
         title="Storylord Characters API",
         description="REST API for managing character profiles",

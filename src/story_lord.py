@@ -4,7 +4,7 @@ import uuid
 import structlog
 import yaml
 
-from config import settings  # noqa: F401
+from bootstrap import bootstrap
 from graph import build_story_generation_graph
 from models import StoryInput
 
@@ -66,6 +66,7 @@ def run_tui() -> None:
 
 
 def main():
+    bootstrap()
     parser = argparse.ArgumentParser(description="AI-powered story generation")
     parser.add_argument("-f", "--file", help="YAML file with story parameters")
     args = parser.parse_args()

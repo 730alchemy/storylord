@@ -75,8 +75,8 @@ def _patch_node_deps(monkeypatch, tmp_path):
         lambda: {"default": DummyAgentType()},
     )
     monkeypatch.setattr(
-        "graph.nodes.settings",
-        SimpleNamespace(character_library_dir=str(tmp_path)),
+        "graph.nodes.get_settings",
+        lambda: SimpleNamespace(character_library_dir=str(tmp_path)),
     )
 
 

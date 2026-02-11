@@ -8,7 +8,7 @@ import structlog
 
 from agents.discovery import discover_character_agent_types, get_character_agent_type
 from character_store.store import CharacterStore
-from config import settings
+from config import get_settings
 from slack_app.modals import build_correction_modal
 from slack_app.state import StateManager
 from slack_app.views import build_confirmation_message
@@ -50,6 +50,7 @@ def handle_save_action(
 
     # Convert state to profile and save
     profile = state.to_character_profile()
+    settings = get_settings()
     store = CharacterStore(library_dir=Path(settings.character_library_dir))
     saved_path = store.save(profile)
 

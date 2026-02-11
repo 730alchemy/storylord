@@ -5,7 +5,7 @@ from __future__ import annotations
 from slack_bolt import App
 
 from agents.discovery import discover_character_agent_types
-from config import settings
+from bootstrap import bootstrap
 from slack_app.handlers.actions import handle_edit_action, handle_save_action
 from slack_app.handlers.commands import handle_create_character
 from slack_app.handlers.messages import handle_message
@@ -23,6 +23,7 @@ state_manager = StateManager()
 
 def create_app() -> App:
     """Create and configure the Bolt App with all registered handlers."""
+    settings = bootstrap()
     app = App(
         signing_secret=settings.slack_signing_secret,
         token=settings.slack_bot_token,
