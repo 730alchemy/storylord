@@ -1,0 +1,9 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "loggers": {
+        "uvicorn":        { "propagate": true },
+        "uvicorn.access": { "propagate": true },
+        "uvicorn.error":  { "propagate": true }
+    }
+}

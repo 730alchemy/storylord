@@ -1,6 +1,5 @@
 import logging.config
 import os
-from pathlib import Path
 
 import structlog
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,6 +27,9 @@ class Settings(BaseSettings):
     llm_editor_model: str | None = None
     llm_narrator_model: str | None = None
 
+    # Logging
+    log_format: str = "console"  # "console" | "json"
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
@@ -50,11 +52,8 @@ def get_model_for_agent_type(agent_type: str) -> str:
     return per_agent_model if per_agent_model else settings.llm_default_model
 
 
-def configure_logging():
+def configure_logging(log_format: str = "console"):
     """Configure structlog with stdlib logging integration."""
-    # Ensure log directory exists
-    Path("logs").mkdir(exist_ok=True)
-
     # Shared processors for all logs
     shared_processors = [
         structlog.contextvars.merge_contextvars,
@@ -73,6 +72,8 @@ def configure_logging():
         default_columns["event"],
         structlog.dev.Column("", default_renderer._default_column_formatter),
     ]
+
+    formatter = "json" if log_format == "json" else "console"
 
     logging.config.dictConfig(
         {
@@ -97,19 +98,15 @@ def configure_logging():
                 },
             },
             "handlers": {
-                "console": {
+                "stdout": {
                     "class": "logging.StreamHandler",
-                    "formatter": "console",
-                },
-                "file": {
-                    "class": "logging.handlers.WatchedFileHandler",
-                    "filename": "logs/storylord.log",
-                    "formatter": "json",
+                    "stream": "ext://sys.stdout",
+                    "formatter": formatter,
                 },
             },
             "loggers": {
                 "": {
-                    "handlers": ["console", "file"],
+                    "handlers": ["stdout"],
                     "level": "INFO",
                 },
                 "httpx": {
@@ -143,5 +140,5 @@ def initialize_environment():
 
 
 # Auto-initialize when module is imported
-configure_logging()
 settings = initialize_environment()
+configure_logging(settings.log_format)

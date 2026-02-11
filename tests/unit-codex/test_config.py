@@ -16,13 +16,3 @@ def test_initialize_environment_sets_env_var(monkeypatch, tmp_path):
 
     assert settings.anthropic_api_key == "from_env_file"
     assert os.environ["ANTHROPIC_API_KEY"] == "from_env_file"
-
-
-def test_configure_logging_creates_logs_dir(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
-
-    import config as config_module
-
-    config_module.configure_logging()
-
-    assert (tmp_path / "logs").exists()
