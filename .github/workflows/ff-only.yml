@@ -1,0 +1,17 @@
+name: Enforce FF-only
+on: [pull_request]
+jobs:
+  ff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          fetch-depth: 0
+      - name: Fetch PR branch
+        run: |
+          git fetch origin ${{ github.head_ref }}:pr
+      - name: Verify fast-forward is possible
+        run: |
+          git merge-base --is-ancestor HEAD pr
