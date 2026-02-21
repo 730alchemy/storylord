@@ -1,7 +1,7 @@
 name: Enforce FF-only
 on: [pull_request]
 jobs:
-  ff:
+  ff-only-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch
